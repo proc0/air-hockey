@@ -1,0 +1,12 @@
+pub game fn World.Main() {
+    SpawnEachPlayer owner {
+        Print {
+            P {
+                PlayerNameDisplay
+                " stumbles upon an empty universe,"
+                %(LineBreak)
+                "yet to be filled by the wishes of its creator"
+            }
+        }
+    }
+}
