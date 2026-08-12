@@ -1,0 +1,25 @@
+pub tangible category Category:Mallet
+
+pub fn mallet.Mallet([owner]) {
+    use body = mallet
+    use radius = 5
+    use layer = 3
+    
+    Body(pos=@(-20, -20), gravityScale=0)
+    PolygonCollider(shape=Circle, category=Category:Mallet, density=3, restitution=1, intercept=Category:Puck)
+    PolygonSprite(shape=Circle(radius=5), color=#ff0000, layer=layer)
+
+    with Pointer {
+        // lastPos = Pointer
+        behavior on BeforePhysics {
+            Velocity = (Pointer - Pos)*30
+            // Pos = Pointer
+        }
+        Heading = Angle(Pointer - Pos)
+        // behavior on AfterPhysics {
+        //     // Pos = Pointer
+        //     // Velocity = Pointer - lastPos
+        //     lastPos = Pointer
+        // }
+    }
+}

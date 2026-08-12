@@ -1,0 +1,12 @@
+pub tangible category Category:Puck
+
+pub fn puck.Puck {
+    use body = puck
+    use radius = 5
+    use layer = 3
+    
+    Body(pos=@(0, 0), gravityScale=0, bullet=true)
+    PolygonCollider(shape=Circle, category=Category:Puck, restitution=1, intercept=Category:Mallet)
+    PolygonSprite(shape=Circle(radius=5), color=#ffffff, layer=layer)
+    
+}
