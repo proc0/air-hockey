@@ -1,4 +1,8 @@
 pub game fn World.Main() {
+    Spawn table {
+        Table
+    }
+    
     SpawnEachPlayer owner {
         Subspawn mallet {
             Mallet

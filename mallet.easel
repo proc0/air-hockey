@@ -1,13 +1,15 @@
 pub tangible category Category:Mallet
 
+const MALLET_RESTITUTION = 0.9
+const MALLET_RADIUS = 4.5
+
 pub fn mallet.Mallet([owner]) {
     use body = mallet
-    use radius = 5
     use layer = 3
     
-    Body(pos=@(-20, -20), gravityScale=0)
-    PolygonCollider(shape=Circle, category=Category:Mallet, density=3, restitution=1, intercept=Category:Puck)
-    PolygonSprite(shape=Circle(radius=5), color=#ff0000, layer=layer)
+    Body(pos=Pointer, gravityScale=0)
+    PolygonCollider(shape=Circle(radius=MALLET_RADIUS), category=Category:Mallet, density=1, restitution=MALLET_RESTITUTION, intercept=Category:Puck)
+    PolygonSprite(shape=Circle(radius=MALLET_RADIUS), color=#ff0000, layer=layer)
 
     with Pointer {
         // lastPos = Pointer

@@ -1,12 +1,15 @@
 pub tangible category Category:Puck
 
+const PUCK_RESTITUTION = 0.8
+const PUCK_FRICTION = 0.9
+const PUCK_RADIUS = 4.5
+
 pub fn puck.Puck {
     use body = puck
-    use radius = 5
     use layer = 3
     
     Body(pos=@(0, 0), gravityScale=0, bullet=true)
-    PolygonCollider(shape=Circle, category=Category:Puck, restitution=1, intercept=Category:Mallet)
-    PolygonSprite(shape=Circle(radius=5), color=#ffffff, layer=layer)
+    PolygonCollider(shape=Circle(radius=PUCK_RADIUS), category=Category:Puck, density=2, restitution=PUCK_RESTITUTION, friction=PUCK_FRICTION, intercept=Category:Mallet)
+    PolygonSprite(shape=Circle(radius=PUCK_RADIUS), color=#ffffff, layer=layer)
     
 }
