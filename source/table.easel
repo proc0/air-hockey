@@ -1,0 +1,68 @@
+pub tangible category Category:Table
+
+const TABLE_SIZE = @(140, 70)
+const TABLE_POS = @(0, 0)
+const TABLE_BORDER_WIDTH = 2
+const TABLE_CORNER_WIDTH = 1
+const TABLE_CORNER_CURVE = 7
+const TABLE_RESTITUTION = 0.7
+
+symbol TableCornerTopLeft
+symbol TableCornerTopRight
+
+symbol TableBorderTop
+
+symbol TableCornerBottomLeft
+symbol TableCornerBottomRight
+
+symbol TableBorderLeft
+symbol TableBorderRight
+symbol TableBorderBottom
+
+pub fn table.Table {
+    use body = table
+    use layer = 2
+    
+    Body(pos=TABLE_POS, immovable=true)
+
+    const rectTop = Rectangle(pos=@(0, -TABLE_SIZE.Y*0.5-TABLE_BORDER_WIDTH*0.5), width=TABLE_SIZE.X, height=TABLE_BORDER_WIDTH)
+    const rectLeft = Rectangle(pos=@(-TABLE_SIZE.X*0.5-TABLE_BORDER_WIDTH*0.5, 0), width=TABLE_BORDER_WIDTH, height=TABLE_SIZE.Y)
+    const rectRight = Rectangle(pos=@(TABLE_SIZE.X*0.5+TABLE_BORDER_WIDTH*0.5, 0), width=TABLE_BORDER_WIDTH, height=TABLE_SIZE.Y)
+    const rectBottom = Rectangle(pos=@(0, TABLE_SIZE.Y*0.5+TABLE_BORDER_WIDTH*0.5), width=TABLE_SIZE.X, height=TABLE_BORDER_WIDTH)
+
+    const cornerTopLeft = Arc(arc=0.25rev, orbit=TABLE_CORNER_CURVE, pos=@(-TABLE_SIZE.X*0.5+(2*TABLE_CORNER_CURVE-TABLE_CORNER_WIDTH), -TABLE_SIZE.Y*0.5+TABLE_CORNER_CURVE-TABLE_CORNER_WIDTH), radius=TABLE_CORNER_WIDTH, angle=0.5rev)
+    const cornerTopRight = Arc(arc=0.25rev, orbit=TABLE_CORNER_CURVE, pos=@(TABLE_SIZE.X*0.5+TABLE_CORNER_WIDTH, -TABLE_SIZE.Y*0.5+TABLE_CORNER_CURVE-TABLE_CORNER_WIDTH), radius=TABLE_CORNER_WIDTH, angle=0.75rev)
+    const cornerBottomLeft = Arc(arc=0.25rev, orbit=TABLE_CORNER_CURVE, pos=@(-TABLE_SIZE.X*0.5+(2*TABLE_CORNER_CURVE-TABLE_CORNER_WIDTH), TABLE_SIZE.Y*0.5-TABLE_CORNER_CURVE+TABLE_CORNER_WIDTH), radius=TABLE_CORNER_WIDTH, angle=0.25rev)
+    const cornerBottomRight = Arc(arc=0.25rev, orbit=TABLE_CORNER_CURVE, pos=@(TABLE_SIZE.X*0.5+TABLE_CORNER_WIDTH, TABLE_SIZE.Y*0.5-TABLE_CORNER_CURVE+TABLE_CORNER_WIDTH), radius=TABLE_CORNER_WIDTH, angle=0rev)
+   
+
+    PolygonCollider<TableCornerTopLeft>(shape=cornerTopLeft, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    PolygonSprite(shape=cornerTopLeft, color=#00ff00)
+    
+    PolygonCollider<TableCornerTopRight>(shape=cornerTopRight, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    PolygonSprite(shape=cornerTopRight, color=#00ff00)
+
+
+    
+    PolygonCollider<TableBorderTop>(shape=rectTop, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    PolygonSprite(shape=rectTop, color=#00ff00, layer=layer)
+
+    
+
+    PolygonCollider<TableCornerBottomLeft>(shape=cornerBottomLeft, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    PolygonSprite(shape=cornerBottomLeft, color=#00ff00)
+    
+    PolygonCollider<TableCornerBottomRight>(shape=cornerBottomRight, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    PolygonSprite(shape=cornerBottomRight, color=#00ff00)
+    
+
+    
+    PolygonCollider<TableBorderLeft>(shape=rectLeft, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    PolygonSprite(shape=rectLeft, color=#00ff00, layer=layer)
+
+    PolygonCollider<TableBorderRight>(shape=rectRight, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    PolygonSprite(shape=rectRight, color=#00ff00, layer=layer)
+
+    PolygonCollider<TableBorderBottom>(shape=rectBottom, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    PolygonSprite(shape=rectBottom, color=#00ff00, layer=layer)
+}
