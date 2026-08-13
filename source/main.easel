@@ -1,6 +1,18 @@
 pub game fn World.Main() {
     Spawn table {
         Table
+
+        on GoalLeft {
+            Spawn puck {
+                Puck
+            }
+        }
+
+        on GoalRight {
+            Spawn puck {
+                Puck
+            }
+        }
     }
     
     SpawnEachPlayer owner {

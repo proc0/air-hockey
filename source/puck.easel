@@ -4,9 +4,10 @@ const PUCK_RESTITUTION = 0.8
 const PUCK_FRICTION = 0
 const PUCK_RADIUS = 4
 
-pub fn puck.Puck {
+pub fn puck.Puck(pos=@(0,0)) {
     use body = puck
     use layer = 4
+    use pos=pos
     
     Body(pos=@(0, 0), gravityScale=0)
     PolygonCollider(shape=Circle(radius=PUCK_RADIUS), category=Category:Puck, density=1, restitution=PUCK_RESTITUTION, friction=PUCK_FRICTION, intercept=true, tolerance=0.1)
@@ -19,7 +20,8 @@ pub fn puck.Puck {
     
     DecaySpeed(0.015)
     DecayTurnRate(0.08)
-
+    LimitSpeed(300)
+    
     on Paint {
         Streak(dissipate=0.2s, bloom=0.6, diminish=0.9, taper=0.8, fade=0.8, opacity=0.5, radius=3, ownerColor=0, bloomAlpha=0.2, glare=0.3, color=#bbbbbb, layer=layer-1)
     }

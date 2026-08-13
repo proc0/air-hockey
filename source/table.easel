@@ -1,7 +1,7 @@
 pub tangible category Category:Table
 
-const TABLE_SIZE = @(140, 70)
-const TABLE_GOAL_SIZE = 0.3
+const TABLE_SIZE = @(150, 75)
+const TABLE_GOAL_SIZE = 0.25
 const TABLE_POS = @(0, 0)
 const TABLE_BORDER_WIDTH = 2
 const TABLE_CORNER_WIDTH = 1
@@ -17,12 +17,16 @@ symbol TableCornerBottomLeft
 symbol TableCornerBottomRight
 
 symbol TableBorderLeftTop
+symbol TableGoalLeft
 symbol TableBorderLeftBottom
 symbol TableBorderRightTop
+symbol TableGoalRight
 symbol TableBorderRightBottom
 symbol TableBorderBottom
 
 pub signal World.PointerOut
+pub signal World.GoalLeft
+pub signal World.GoalRight
 
 pub fn table.Table {
     use body = table
@@ -88,9 +92,13 @@ pub fn table.Table {
     
     PolygonSprite(shape=Rectangle(width=TABLE_SIZE.X-8, height=TABLE_SIZE.Y-8, border=5), color=#0000ff, layer=layer)
     PolygonSprite(shape=Rectangle(width=TABLE_SIZE.X-10, height=TABLE_SIZE.Y-10, border=5), color=#bebebe, layer=layer)
+
+    const goalSensorOffset = 1
+    PolygonCollider<TableGoalLeft>(shape=Rectangle(pos=@(-TABLE_SIZE.X*0.5-goalSensorOffset, 0), width=5, height=goalSize), isSensor=true, category=Category:Table, collideWith=Category:Puck, sense=Category:Puck)
+    PolygonSprite(shape=Rectangle(pos=@(-TABLE_SIZE.X*0.5-goalSensorOffset, 0), width=5, height=goalSize), color=#00ff00, layer=layer+3)
     
-    PolygonSprite(shape=Rectangle(pos=@(-TABLE_SIZE.X*0.5, 0), width=5, height=goalSize), color=#00ff00, layer=layer+3)
-    PolygonSprite(shape=Rectangle(pos=@(TABLE_SIZE.X*0.5, 0), width=5, height=goalSize), color=#00ff00, layer=layer+3)
+    PolygonCollider<TableGoalRight>(shape=Rectangle(pos=@(TABLE_SIZE.X*0.5+goalSensorOffset, 0), width=5, height=goalSize), isSensor=true, category=Category:Table, collideWith=Category:Puck, sense=Category:Puck)
+    PolygonSprite(shape=Rectangle(pos=@(TABLE_SIZE.X*0.5+goalSensorOffset, 0), width=5, height=goalSize), color=#00ff00, layer=layer+3)
     
     PolygonSprite(shape=Line([@(-TABLE_SIZE.X*0.25,-TABLE_SIZE.Y*0.5+0.25), @(-TABLE_SIZE.X*0.25,TABLE_SIZE.Y*0.5-0.25)], radius=0.2), color=#888888, layer=layer)
     PolygonSprite(shape=Line([@(0,-TABLE_SIZE.Y*0.5+0.25), @(0,TABLE_SIZE.Y*0.5-0.25)], radius=0.2), color=#888888, layer=layer)
@@ -105,6 +113,16 @@ pub fn table.Table {
         if that.Category.Overlaps(Category:Mallet) && PointerOutside(that.Owner) {
             PointerOut
         }
+    }
+
+    on AfterCollide<TableGoalLeft> that {
+        that.Despawn
+        GoalLeft
+    }
+
+    on AfterCollide<TableGoalRight> that {
+        that.Despawn
+        GoalRight
     }
 }
 
