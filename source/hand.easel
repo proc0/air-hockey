@@ -1,0 +1,23 @@
+
+symbol HandIcon
+
+pub fn hand.Hand([owner]) {
+    use body = hand
+    use layer = 4
+    
+    PolygonSprite<HandIcon>(shape=Rectangle(width=2,height=2), color=#ffffff, layer=layer+1)
+
+    on MalletGrab {
+        delete PolygonSprite<HandIcon>    
+        PolygonSprite<HandIcon>(shape=Rectangle(width=2,height=2), color=#00ff00, layer=layer+1)
+    }
+
+    on MalletRelease {
+        delete PolygonSprite<HandIcon>    
+        PolygonSprite<HandIcon>(shape=Rectangle(width=2,height=2), color=#ffffff, layer=layer+1)   
+    }
+    
+    with Pointer {
+        Pos = Pointer
+    }
+}

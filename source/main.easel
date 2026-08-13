@@ -7,6 +7,10 @@ pub game fn World.Main() {
         Subspawn mallet {
             Mallet
         }
+        
+        Subspawn hand {
+            Hand
+        }
     }
 
     Spawn puck {
