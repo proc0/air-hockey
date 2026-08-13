@@ -70,9 +70,20 @@ pub fn table.Table {
     PolygonCollider<TableBorderBottom>(shape=rectBottom, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
     // PolygonSprite(shape=rectBottom, color=#00ff00, layer=layer)
 
+
+    
     PolygonSprite(shape=Rectangle(width=TABLE_SIZE.X-8, height=TABLE_SIZE.Y-8, border=5), color=#0000ff, layer=layer)
     PolygonSprite(shape=Rectangle(width=TABLE_SIZE.X-10, height=TABLE_SIZE.Y-10, border=5), color=#bebebe, layer=layer)
+    
+    PolygonSprite(shape=Line([@(-TABLE_SIZE.X*0.25,-TABLE_SIZE.Y*0.5+0.25), @(-TABLE_SIZE.X*0.25,TABLE_SIZE.Y*0.5-0.25)], radius=0.2), color=#888888, layer=layer)
+    PolygonSprite(shape=Line([@(0,-TABLE_SIZE.Y*0.5+0.25), @(0,TABLE_SIZE.Y*0.5-0.25)], radius=0.2), color=#888888, layer=layer)
+    PolygonSprite(shape=Line([@(TABLE_SIZE.X*0.25,-TABLE_SIZE.Y*0.5+0.25), @(TABLE_SIZE.X*0.25,TABLE_SIZE.Y*0.5-0.25)], radius=0.2), color=#888888, layer=layer)
+    PolygonSprite(shape=Circle(radius=7), color=#888888, layer=layer)
+    PolygonSprite(shape=Circle(radius=6.6), color=#bebebe, layer=layer)
+    PolygonSprite(shape=Circle(radius=0.5), color=#888888, layer=layer)
 
+
+    
     on BeforeCollide that {
         if that.Category.Overlaps(Category:Mallet) && PointerOutside(that.Owner) {
             PointerOut

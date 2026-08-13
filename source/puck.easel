@@ -10,15 +10,18 @@ pub fn puck.Puck {
     
     Body(pos=@(0, 0), gravityScale=0)
     PolygonCollider(shape=Circle(radius=PUCK_RADIUS), category=Category:Puck, density=1, restitution=PUCK_RESTITUTION, friction=PUCK_FRICTION, intercept=true, tolerance=0.1)
-    PolygonSprite(shape=Circle(radius=PUCK_RADIUS), color=#222222, layer=layer)
-    PolygonSprite(shape=Circle(radius=PUCK_RADIUS-0.5), color=#ffffff, layer=layer)
-    PolygonSprite(shape=Line([@(0,-PUCK_RADIUS), @(0, PUCK_RADIUS)], radius=0.5), color=#222222, layer=layer+1)
+    PolygonSprite(shape=Circle(radius=PUCK_RADIUS), color=#555555, layer=layer)
+    PolygonSprite(shape=Circle(radius=PUCK_RADIUS-0.5), color=#000000, layer=layer)
+    // PolygonSprite(shape=Line([@(0,-PUCK_RADIUS), @(0, PUCK_RADIUS)], radius=0.5), color=#222222, layer=layer+1)
+    PolygonSprite(shape=Rhombus(width=PUCK_RADIUS, height=PUCK_RADIUS*0.6), color=#555555, layer=layer+1)
+    // PolygonSprite(shape=Rhombus(width=PUCK_RADIUS*0.65, height=PUCK_RADIUS*0.3), color=#000000, layer=layer+1)
+    PolygonSprite(shape=Circle(radius=PUCK_RADIUS*0.2), color=#000000, layer=layer+1)
     
     DecaySpeed(0.015)
     DecayTurnRate(0.08)
 
     on Paint {
-        Streak(dissipate=0.5s, bloom=1, radius=1, ownerColor=0, bloomAlpha=0.5, glare=0.3, color=#ffffff, layer=layer-1)
+        Streak(dissipate=0.2s, bloom=0.6, diminish=0.9, taper=0.8, fade=0.8, opacity=0.5, radius=3, ownerColor=0, bloomAlpha=0.2, glare=0.3, color=#bbbbbb, layer=layer-1)
     }
 
     // Curve ball
@@ -34,7 +37,7 @@ pub fn puck.Puck {
             collideState = collideDecayDuration
             // collideTargetRate = Abs(1-Dot(Velocity.Direction, that.Velocity.Direction))*0.5
             let collideDirection = Dot(Velocity.Direction, that.Velocity.Direction)
-            collideTargetRate = Abs(collideDirection) < 0.3 ? (1-Abs(collideDirection)).Clamp(0,1) : 0
+            collideTargetRate = Abs(collideDirection) < 0.5 ? (1-Abs(collideDirection)).Clamp(0,1)*0.5 : 0
             collideTargetDirection = (that.Velocity*-1 + Velocity)/2
             ConsoleLog(collideTargetRate)
         }
