@@ -6,36 +6,46 @@ const PUCK_RADIUS = 4
 
 pub fn puck.Puck {
     use body = puck
-    use layer = 3
+    use layer = 4
     
     Body(pos=@(0, 0), gravityScale=0)
     PolygonCollider(shape=Circle(radius=PUCK_RADIUS), category=Category:Puck, density=1, restitution=PUCK_RESTITUTION, friction=PUCK_FRICTION, intercept=true, tolerance=0.1)
-    PolygonSprite(shape=Circle(radius=PUCK_RADIUS), color=#ffffff, layer=layer)
+    PolygonSprite(shape=Circle(radius=PUCK_RADIUS), color=#222222, layer=layer)
+    PolygonSprite(shape=Circle(radius=PUCK_RADIUS-0.5), color=#ffffff, layer=layer)
     PolygonSprite(shape=Line([@(0,-PUCK_RADIUS), @(0, PUCK_RADIUS)], radius=0.5), color=#222222, layer=layer+1)
     
     DecaySpeed(0.015)
     DecayTurnRate(0.08)
 
-    let collisionVector = @(0,0)
-
-    once BeforeCollide that {
-        if that.Category.Overlaps(Category:Mallet) {
-            // let turnAmount = Dot(Velocity.Direction, that.Velocity)*Length(that.Velocity)
-            collisionVector = that.Velocity
-        }
+    on Paint {
+        Streak(dissipate=0.5s, bloom=1, radius=1, ownerColor=0, bloomAlpha=0.5, glare=0.3, color=#ffffff, layer=layer-1)
     }
-    
+
+    // Curve ball
+    // ----------
+    let collideState = 0
+    const frameDuration = TicksPerSecond/60
+    const collideDecayDuration = 0.5*frameDuration
+    const collideDecayRate = 0.005
+    let collideTargetRate = 0
+    let collideTargetDirection = @(0, 0)
     on BeforeCollide that {
-        if that.Category.Overlaps(Category:Mallet) {
-            let turnAmount = Dot(Velocity.Direction, that.Velocity)*Length(that.Velocity)
-            ApplyTurningImpulse(Abs(1-turnAmount))
+        if (collideState <= 0 && that.Category.Overlaps(Category:Mallet) && Length(that.Velocity) > 100) {
+            collideState = collideDecayDuration
+            // collideTargetRate = Abs(1-Dot(Velocity.Direction, that.Velocity.Direction))*0.5
+            let collideDirection = Dot(Velocity.Direction, that.Velocity.Direction)
+            collideTargetRate = Abs(collideDirection) < 0.3 ? (1-Abs(collideDirection)).Clamp(0,1) : 0
+            collideTargetDirection = (that.Velocity*-1 + Velocity)/2
+            ConsoleLog(collideTargetRate)
         }
     }
 
     on BeforePhysics {
-        if (Abs(collisionVector.X) > 0.2 || Abs(collisionVector.Y) > 0.2) {
-            Velocity += collisionVector
-            collisionVector *= 0.01
+        if (collideState > 0) {
+            collideState -= collideDecayRate
+            Velocity = Velocity.Towards(collideTargetDirection, collideTargetRate*2)
+            ApplyTurningImpulse(collideTargetRate*500)
         }
     }
+
 }

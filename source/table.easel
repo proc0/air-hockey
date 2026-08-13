@@ -19,12 +19,16 @@ symbol TableBorderLeft
 symbol TableBorderRight
 symbol TableBorderBottom
 
+pub signal World.PointerOut
+
 pub fn table.Table {
     use body = table
     use layer = 2
     
     Body(pos=TABLE_POS, immovable=true)
 
+    // PoligonPerimiter(shape=Rectangle(width=TABLE_SIZE.X, height=TABLE_SIZE.Y))
+    
     const rectTop = Rectangle(pos=@(0, -TABLE_SIZE.Y*0.5-TABLE_BORDER_WIDTH*0.5), width=TABLE_SIZE.X, height=TABLE_BORDER_WIDTH)
     const rectLeft = Rectangle(pos=@(-TABLE_SIZE.X*0.5-TABLE_BORDER_WIDTH*0.5, 0), width=TABLE_BORDER_WIDTH, height=TABLE_SIZE.Y)
     const rectRight = Rectangle(pos=@(TABLE_SIZE.X*0.5+TABLE_BORDER_WIDTH*0.5, 0), width=TABLE_BORDER_WIDTH, height=TABLE_SIZE.Y)
@@ -35,34 +39,47 @@ pub fn table.Table {
     const cornerBottomLeft = Arc(arc=0.25rev, orbit=TABLE_CORNER_CURVE, pos=@(-TABLE_SIZE.X*0.5+(2*TABLE_CORNER_CURVE-TABLE_CORNER_WIDTH), TABLE_SIZE.Y*0.5-TABLE_CORNER_CURVE+TABLE_CORNER_WIDTH), radius=TABLE_CORNER_WIDTH, angle=0.25rev)
     const cornerBottomRight = Arc(arc=0.25rev, orbit=TABLE_CORNER_CURVE, pos=@(TABLE_SIZE.X*0.5+TABLE_CORNER_WIDTH, TABLE_SIZE.Y*0.5-TABLE_CORNER_CURVE+TABLE_CORNER_WIDTH), radius=TABLE_CORNER_WIDTH, angle=0rev)
    
-
-    PolygonCollider<TableCornerTopLeft>(shape=cornerTopLeft, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
-    PolygonSprite(shape=cornerTopLeft, color=#00ff00)
     
-    PolygonCollider<TableCornerTopRight>(shape=cornerTopRight, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
-    PolygonSprite(shape=cornerTopRight, color=#00ff00)
-
-
+    PolygonCollider<TableCornerTopLeft>(shape=cornerTopLeft, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    // PolygonSprite(shape=cornerTopLeft, color=#00ff00)
     
-    PolygonCollider<TableBorderTop>(shape=rectTop, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
-    PolygonSprite(shape=rectTop, color=#00ff00, layer=layer)
+    PolygonCollider<TableCornerTopRight>(shape=cornerTopRight, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    // PolygonSprite(shape=cornerTopRight, color=#00ff00)
+
 
     
-
-    PolygonCollider<TableCornerBottomLeft>(shape=cornerBottomLeft, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
-    PolygonSprite(shape=cornerBottomLeft, color=#00ff00)
-    
-    PolygonCollider<TableCornerBottomRight>(shape=cornerBottomRight, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
-    PolygonSprite(shape=cornerBottomRight, color=#00ff00)
-    
+    PolygonCollider<TableBorderTop>(shape=rectTop, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    // PolygonSprite(shape=rectTop, color=#00ff00, layer=layer)
 
     
-    PolygonCollider<TableBorderLeft>(shape=rectLeft, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
-    PolygonSprite(shape=rectLeft, color=#00ff00, layer=layer)
 
-    PolygonCollider<TableBorderRight>(shape=rectRight, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
-    PolygonSprite(shape=rectRight, color=#00ff00, layer=layer)
+    PolygonCollider<TableCornerBottomLeft>(shape=cornerBottomLeft, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    // PolygonSprite(shape=cornerBottomLeft, color=#00ff00)
+    
+    PolygonCollider<TableCornerBottomRight>(shape=cornerBottomRight, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    // PolygonSprite(shape=cornerBottomRight, color=#00ff00)
+    
 
-    PolygonCollider<TableBorderBottom>(shape=rectBottom, category=Category:Tangible, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
-    PolygonSprite(shape=rectBottom, color=#00ff00, layer=layer)
+    
+    PolygonCollider<TableBorderLeft>(shape=rectLeft, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    // PolygonSprite(shape=rectLeft, color=#00ff00, layer=layer)
+
+    PolygonCollider<TableBorderRight>(shape=rectRight, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    // PolygonSprite(shape=rectRight, color=#00ff00, layer=layer)
+
+    PolygonCollider<TableBorderBottom>(shape=rectBottom, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    // PolygonSprite(shape=rectBottom, color=#00ff00, layer=layer)
+
+    PolygonSprite(shape=Rectangle(width=TABLE_SIZE.X-8, height=TABLE_SIZE.Y-8, border=5), color=#0000ff, layer=layer)
+    PolygonSprite(shape=Rectangle(width=TABLE_SIZE.X-10, height=TABLE_SIZE.Y-10, border=5), color=#bebebe, layer=layer)
+
+    on BeforeCollide that {
+        if that.Category.Overlaps(Category:Mallet) && PointerOutside(that.Owner) {
+            PointerOut
+        }
+    }
+}
+
+fn table.PointerOutside([owner]) -> Boolean {
+    return Pointer.X < -TABLE_SIZE.X*0.5 || Pointer.X > TABLE_SIZE.X*0.5 || Pointer.Y < -TABLE_SIZE.Y*0.5 || Pointer.Y > TABLE_SIZE.Y*0.5
 }

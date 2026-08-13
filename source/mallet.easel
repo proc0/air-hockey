@@ -1,27 +1,57 @@
 pub tangible category Category:Mallet
 
 const MALLET_RESTITUTION = 0.9
-const MALLET_RADIUS = 4
+const MALLET_RADIUS = 5
+
+signal mallet.Grab
+signal mallet.Release
+
+symbol Hand
 
 pub fn mallet.Mallet([owner]) {
     use body = mallet
-    use layer = 3
+    use layer = 4
     
     Body(pos=Pointer, gravityScale=0)
-    PolygonCollider(shape=Circle(radius=MALLET_RADIUS), category=Category:Mallet, density=1, restitution=MALLET_RESTITUTION, intercept=Category:Puck, tolerance=0.1)
-    PolygonSprite(shape=Circle(radius=MALLET_RADIUS), color=#ff0000, layer=layer)
+    PolygonCollider(shape=Circle(radius=MALLET_RADIUS), category=Category:Mallet, restitution=MALLET_RESTITUTION, intercept=Category:Puck, tolerance=0.1)
+    PolygonSprite(shape=Circle(radius=MALLET_RADIUS), color=#bb0000, layer=layer)
+    PolygonSprite(shape=Circle(radius=MALLET_RADIUS*0.8), color=#ff0000, layer=layer)
+    PolygonSprite(shape=Circle(radius=MALLET_RADIUS*0.4), color=#bb0000, layer=layer)
 
+    let grabbing = false
+
+    on Grab {
+        PolygonSprite<Hand>(shape=Rectangle(width=2,height=2), color=#ffffff, layer=layer+1)
+    }
+
+    on Release {
+        delete PolygonSprite<Hand>
+        
+    }
+    
     with Pointer {
-        // lastPos = Pointer
         behavior on BeforePhysics {
-            Velocity = (Pointer - Pos)*30
-            // Pos = Pointer
+            if grabbing {
+                Velocity = (Pointer - Pos)*30
+            }
         }
-        Heading = Angle(Pointer - Pos)
-        // behavior on AfterPhysics {
-        //     // Pos = Pointer
-        //     // Velocity = Pointer - lastPos
-        //     lastPos = Pointer
-        // }
+    }
+
+    on ButtonDown(Click) {
+        grabbing = true
+
+        Grab
+    }
+
+    on ButtonDown(SecondaryClick) {
+        grabbing = false
+
+        Release
+    }
+
+
+    on PointerOut {
+        grabbing = false
+        Release
     }
 }
