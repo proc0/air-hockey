@@ -1,6 +1,7 @@
 pub tangible category Category:Table
 
 const TABLE_SIZE = @(140, 70)
+const TABLE_GOAL_SIZE = 0.3
 const TABLE_POS = @(0, 0)
 const TABLE_BORDER_WIDTH = 2
 const TABLE_CORNER_WIDTH = 1
@@ -15,8 +16,10 @@ symbol TableBorderTop
 symbol TableCornerBottomLeft
 symbol TableCornerBottomRight
 
-symbol TableBorderLeft
-symbol TableBorderRight
+symbol TableBorderLeftTop
+symbol TableBorderLeftBottom
+symbol TableBorderRightTop
+symbol TableBorderRightBottom
 symbol TableBorderBottom
 
 pub signal World.PointerOut
@@ -30,8 +33,14 @@ pub fn table.Table {
     // PoligonPerimiter(shape=Rectangle(width=TABLE_SIZE.X, height=TABLE_SIZE.Y))
     
     const rectTop = Rectangle(pos=@(0, -TABLE_SIZE.Y*0.5-TABLE_BORDER_WIDTH*0.5), width=TABLE_SIZE.X, height=TABLE_BORDER_WIDTH)
-    const rectLeft = Rectangle(pos=@(-TABLE_SIZE.X*0.5-TABLE_BORDER_WIDTH*0.5, 0), width=TABLE_BORDER_WIDTH, height=TABLE_SIZE.Y)
-    const rectRight = Rectangle(pos=@(TABLE_SIZE.X*0.5+TABLE_BORDER_WIDTH*0.5, 0), width=TABLE_BORDER_WIDTH, height=TABLE_SIZE.Y)
+    
+    const sideSegmentSize = 0.5*TABLE_SIZE.Y*(1 - TABLE_GOAL_SIZE)
+    const goalSize = TABLE_SIZE.Y*TABLE_GOAL_SIZE
+    const rectLeftTop = Rectangle(pos=@(-TABLE_SIZE.X*0.5-TABLE_BORDER_WIDTH*0.5, -(goalSize+sideSegmentSize)*0.5), width=TABLE_BORDER_WIDTH, height=sideSegmentSize)
+    const rectLeftBottom = Rectangle(pos=@(-TABLE_SIZE.X*0.5-TABLE_BORDER_WIDTH*0.5, (goalSize+sideSegmentSize)*0.5), width=TABLE_BORDER_WIDTH, height=sideSegmentSize)
+    const rectRightTop = Rectangle(pos=@(TABLE_SIZE.X*0.5+TABLE_BORDER_WIDTH*0.5, -(goalSize+sideSegmentSize)*0.5), width=TABLE_BORDER_WIDTH, height=sideSegmentSize)
+    const rectRightBottom = Rectangle(pos=@(TABLE_SIZE.X*0.5+TABLE_BORDER_WIDTH*0.5, (goalSize+sideSegmentSize)*0.5), width=TABLE_BORDER_WIDTH, height=sideSegmentSize)
+    
     const rectBottom = Rectangle(pos=@(0, TABLE_SIZE.Y*0.5+TABLE_BORDER_WIDTH*0.5), width=TABLE_SIZE.X, height=TABLE_BORDER_WIDTH)
 
     const cornerTopLeft = Arc(arc=0.25rev, orbit=TABLE_CORNER_CURVE, pos=@(-TABLE_SIZE.X*0.5+(2*TABLE_CORNER_CURVE-TABLE_CORNER_WIDTH), -TABLE_SIZE.Y*0.5+TABLE_CORNER_CURVE-TABLE_CORNER_WIDTH), radius=TABLE_CORNER_WIDTH, angle=0.5rev)
@@ -60,13 +69,18 @@ pub fn table.Table {
     // PolygonSprite(shape=cornerBottomRight, color=#00ff00)
     
 
+    PolygonCollider<TableBorderLeftTop>(shape=rectLeftTop, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    // PolygonSprite(shape=rectLeftTop, color=#00ff00, layer=layer)
+    PolygonCollider<TableBorderLeftBottom>(shape=rectLeftBottom, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    // PolygonSprite(shape=rectLeftBottom, color=#00ff00, layer=layer)
+
+    PolygonCollider<TableBorderRightTop>(shape=rectRightTop, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    // PolygonSprite(shape=rectRightTop, color=#00ff00, layer=layer)
+    PolygonCollider<TableBorderRightBottom>(shape=rectRightBottom, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    // PolygonSprite(shape=rectRightBottom, color=#00ff00, layer=layer)
+
+
     
-    PolygonCollider<TableBorderLeft>(shape=rectLeft, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
-    // PolygonSprite(shape=rectLeft, color=#00ff00, layer=layer)
-
-    PolygonCollider<TableBorderRight>(shape=rectRight, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
-    // PolygonSprite(shape=rectRight, color=#00ff00, layer=layer)
-
     PolygonCollider<TableBorderBottom>(shape=rectBottom, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
     // PolygonSprite(shape=rectBottom, color=#00ff00, layer=layer)
 
@@ -74,6 +88,9 @@ pub fn table.Table {
     
     PolygonSprite(shape=Rectangle(width=TABLE_SIZE.X-8, height=TABLE_SIZE.Y-8, border=5), color=#0000ff, layer=layer)
     PolygonSprite(shape=Rectangle(width=TABLE_SIZE.X-10, height=TABLE_SIZE.Y-10, border=5), color=#bebebe, layer=layer)
+    
+    PolygonSprite(shape=Rectangle(pos=@(-TABLE_SIZE.X*0.5, 0), width=5, height=goalSize), color=#00ff00, layer=layer+3)
+    PolygonSprite(shape=Rectangle(pos=@(TABLE_SIZE.X*0.5, 0), width=5, height=goalSize), color=#00ff00, layer=layer+3)
     
     PolygonSprite(shape=Line([@(-TABLE_SIZE.X*0.25,-TABLE_SIZE.Y*0.5+0.25), @(-TABLE_SIZE.X*0.25,TABLE_SIZE.Y*0.5-0.25)], radius=0.2), color=#888888, layer=layer)
     PolygonSprite(shape=Line([@(0,-TABLE_SIZE.Y*0.5+0.25), @(0,TABLE_SIZE.Y*0.5-0.25)], radius=0.2), color=#888888, layer=layer)
