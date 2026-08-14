@@ -6,13 +6,14 @@ const MALLET_RESTITUTION = 0.9
 pub signal World.MalletGrab
 pub signal World.MalletRelease
 
-pub fn mallet.Mallet([owner], radius=MALLET_RADIUS) {
+pub fn mallet.Mallet([owner], radius=MALLET_RADIUS, pos=Pointer) {
     use body = mallet
     use radius=radius
+    use pos=pos
     use color=#000000
     use layer = 4
     
-    Body(pos=Pointer, gravityScale=0)
+    Body(gravityScale=0)
     PolygonCollider(shape=Circle, category=Category:Mallet, restitution=MALLET_RESTITUTION, intercept=Category:Puck, tolerance=0.1)
     
     PolygonSprite(shape=Circle(radius=radius*1.03))
@@ -37,6 +38,7 @@ pub fn mallet.Mallet([owner], radius=MALLET_RADIUS) {
         }
     }
 
+
     on ButtonDown(Click) {
         grabbing = true
         MalletGrab
@@ -54,3 +56,4 @@ pub fn mallet.Mallet([owner], radius=MALLET_RADIUS) {
         Velocity *= 0.3
     }
 }
+

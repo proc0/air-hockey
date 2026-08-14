@@ -5,26 +5,50 @@ pub game fn World.Main() {
     
     Spawn table {
         Table
+    }
 
-        on GoalTop, GoalBottom, GoalLeft, GoalRight {
-            Spawn puck {
-                Puck
+    let puck = Spawn puck {
+        Puck 
+    }
+    
+    on GoalTop, GoalBottom, GoalLeft, GoalRight {
+        puck = Spawn puck {
+            Puck
+        }
+    }
+
+    const startPos1 = @(20,0)
+    const startPos2 = @(-20,0)
+    
+    SpawnBot
+    SpawnEachPlayer player {
+        let mallet = Subspawn mallet {
+            Mallet(pos=player.IsHuman ? startPos1 : startPos2)
+        }
+
+        if player.IsHuman {           
+            Subspawn hand {
+                Hand
+            }
+        }
+
+        if !player.IsHuman {
+            on Tick(1) {
+                if Abs(mallet.Pos.Y) > Abs(puck.Pos.Y)+3 || Abs(mallet.Pos.Y) < Abs(puck.Pos.Y)-3 {
+                    mallet.Velocity = mallet.Velocity.Towards(@(0, (puck.Pos.Y - mallet.Pos.Y)*100), 50)
+                } else {
+                    mallet.Velocity = @(0,0)
+                }
+            }
+    
+            on BeforeCollide that {
+                mallet.Velocity = @(0,0)
+                // if that.Category.Overlaps(Category:Puck) {
+                //     mallet.Velocity = @(0,0)
+                // }
             }
         }
     }
-    
-    SpawnEachPlayer owner {
-        Subspawn mallet {
-            Mallet
-        }
-        
-        Subspawn hand {
-            Hand
-        }
-    }
 
-    Spawn puck {
-        Puck 
-    }
 
 }
