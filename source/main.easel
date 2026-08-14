@@ -1,5 +1,5 @@
 pub game fn World.Main() {
-    SolidBackground(color=#bbbbbb)
+    SolidBackground(color=#222222)
     Camera(@(0,0), radius=@(50,50))
     Viewport(aspectRatio=1.6)
     

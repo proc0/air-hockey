@@ -6,3 +6,9 @@ name = "Air Hockey"
 
 [engine]
 edition = 17
+
+[players]
+selfColor = "#ff0000"
+colors = ["#0000ff", "#00ff00"]
+
+defaultPrefix = "Player"

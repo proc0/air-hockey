@@ -1,22 +1,25 @@
 pub tangible category Category:Puck
 
+const PUCK_RADIUS = 4
+const PUCK_COLOR = #000000
 const PUCK_RESTITUTION = 0.8
 const PUCK_FRICTION = 0
-const PUCK_RADIUS = 4
 
-pub fn puck.Puck(pos=@(0,0)) {
+pub fn puck.Puck(radius=PUCK_RADIUS, color=PUCK_COLOR, pos=@(0,0)) {
     use body = puck
-    use layer = 4
+    use radius=radius
+    use color=color
     use pos=pos
+    use layer = 4
     
     Body(pos=@(0, 0), gravityScale=0)
-    PolygonCollider(shape=Circle(radius=PUCK_RADIUS), category=Category:Puck, density=1, restitution=PUCK_RESTITUTION, friction=PUCK_FRICTION, intercept=true, tolerance=0.1)
-    PolygonSprite(shape=Circle(radius=PUCK_RADIUS), color=#555555, layer=layer)
-    PolygonSprite(shape=Circle(radius=PUCK_RADIUS-0.5), color=#000000, layer=layer)
-    // PolygonSprite(shape=Line([@(0,-PUCK_RADIUS), @(0, PUCK_RADIUS)], radius=0.5), color=#222222, layer=layer+1)
-    PolygonSprite(shape=Rhombus(width=PUCK_RADIUS, height=PUCK_RADIUS*0.6), color=#555555, layer=layer+1)
-    // PolygonSprite(shape=Rhombus(width=PUCK_RADIUS*0.65, height=PUCK_RADIUS*0.3), color=#000000, layer=layer+1)
-    PolygonSprite(shape=Circle(radius=PUCK_RADIUS*0.2), color=#000000, layer=layer+1)
+    PolygonCollider(shape=Circle, category=Category:Puck, density=1, restitution=PUCK_RESTITUTION, friction=PUCK_FRICTION, intercept=true, tolerance=0.1)
+    
+    PolygonSprite(shape=Circle, color=color.Lighten(0.3), layer=layer)
+    PolygonSprite(shape=Circle(radius=radius-0.5), layer=layer)
+    
+    PolygonSprite(shape=Rhombus(width=radius, height=radius*0.6), color=color.Lighten(0.3), layer=layer+1)
+    PolygonSprite(shape=Circle(radius=radius*0.2), layer=layer+1)
     
     DecaySpeed(0.018)
     DecayTurnRate(0.08)
@@ -37,9 +40,10 @@ pub fn puck.Puck(pos=@(0,0)) {
     on BeforeCollide that {
         if (collideState <= 0 && that.Category.Overlaps(Category:Mallet) && Length(that.Velocity) > 100) {
             collideState = collideDecayDuration
-            // collideTargetRate = Abs(1-Dot(Velocity.Direction, that.Velocity.Direction))*0.5
             let collideDirection = Dot(Velocity.Direction, that.Velocity.Direction)
-            collideTargetRate = Abs(collideDirection) < 0.5 ? (1-Abs(collideDirection)).Clamp(0,1)*0.5 : 0
+            const CURVE_DAMP = 0.7
+            const CURVE_CLAMP = 0.4
+            collideTargetRate = Abs(collideDirection) < CURVE_CLAMP ? (1-Abs(collideDirection)).Clamp(0,1)*CURVE_DAMP : 0
             collideTargetDirection = (that.Velocity*-1 + Velocity)/2
             ConsoleLog(collideTargetRate)
         }

@@ -1,12 +1,18 @@
 pub tangible category Category:Table
 
-const TABLE_SIZE = @(50, 90)
-const TABLE_GOAL_SIZE = 0.25
+const TABLE_SIZE = @(140, 70)
 const TABLE_ORIGIN = @(0, 0)
+const TABLE_GOAL_WIDTH = 0.25
+const TABLE_GOAL_DEPTH = 5
 const TABLE_BORDER_WIDTH = 2
 const TABLE_CORNER_WIDTH = 1
 const TABLE_CORNER_CURVE = 7
 const TABLE_RESTITUTION = 0.7
+
+const TABLE_COLOR_SURFACE = #dddddd
+const TABLE_COLOR_GOAL = #87ee89
+const TABLE_COLOR_BORDER = #3434ff
+const TABLE_COLOR_LINE = #888888
 
 symbol TableOrientationLandscape
 symbol TableOrientationPortrait
@@ -57,17 +63,16 @@ pub fn table.Table(tableSize=TABLE_SIZE) {
 
     let tableOrientation = tableSize.X > tableSize.Y ? TableOrientationLandscape : TableOrientationPortrait
 
-    let goalSize = @(5, tableSize.Y*TABLE_GOAL_SIZE)
-    let goalSideLength = 0.5*tableSize.Y*(1 - TABLE_GOAL_SIZE)
-    let goalSensorOffset = 4
+    let goalSize = @(TABLE_GOAL_DEPTH, tableSize.Y*TABLE_GOAL_WIDTH)
+    let goalSideLength = 0.5*tableSize.Y*(1 - TABLE_GOAL_WIDTH)
+    let goalSensorOffset = TABLE_BORDER_WIDTH*2
     if (tableOrientation == TableOrientationPortrait) {
-        goalSize = @(tableSize.X*TABLE_GOAL_SIZE, 5)
-        goalSideLength = 0.5*tableSize.X*(1 - TABLE_GOAL_SIZE)
-        goalSensorOffset = 2
+        goalSize = @(tableSize.X*TABLE_GOAL_WIDTH, TABLE_GOAL_DEPTH)
+        goalSideLength = 0.5*tableSize.X*(1 - TABLE_GOAL_WIDTH)
     }
     
-    // Table Border Shapes
-    // -------------------
+    // Table Border Collision Shapes
+    // -----------------------------
     // top corners
     const cornerTopLeft = Arc(arc=0.25rev, orbit=TABLE_CORNER_CURVE, pos=@(-tableSize.X*0.5+(2*TABLE_CORNER_CURVE-TABLE_CORNER_WIDTH), -tableSize.Y*0.5+TABLE_CORNER_CURVE-TABLE_CORNER_WIDTH), radius=TABLE_CORNER_WIDTH, angle=0.5rev)
     const cornerTopRight = Arc(arc=0.25rev, orbit=TABLE_CORNER_CURVE, pos=@(tableSize.X*0.5+TABLE_CORNER_WIDTH, -tableSize.Y*0.5+TABLE_CORNER_CURVE-TABLE_CORNER_WIDTH), radius=TABLE_CORNER_WIDTH, angle=0.75rev)
@@ -100,63 +105,74 @@ pub fn table.Table(tableSize=TABLE_SIZE) {
 
     // Table Collision
     // ---------------
-    PolygonCollider<TableCornerTopLeft>(shape=cornerTopLeft, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    PolygonCollider<TableCornerTopLeft>(shape=cornerTopLeft, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
     // PolygonSprite(shape=cornerTopLeft, color=#00ff00)
-    PolygonCollider<TableCornerTopRight>(shape=cornerTopRight, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    PolygonCollider<TableCornerTopRight>(shape=cornerTopRight, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
     // PolygonSprite(shape=cornerTopRight, color=#00ff00)
 
     if tableOrientation == TableOrientationPortrait {
-        PolygonCollider<TableBorderTopLeft>(shape=rectTopLeft, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+        PolygonCollider<TableBorderTopLeft>(shape=rectTopLeft, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
         // PolygonSprite(shape=rectTopLeft, color=#00ff00, layer=layer)
         PolygonCollider<TableGoalTop>(shape=rectGoalTop, isSensor=true, category=Category:Table, collideWith=Category:Puck, sense=Category:Puck)
-        PolygonSprite(shape=rectGoalTop, color=#00ff00, layer=layer+3)
-        PolygonCollider<TableBorderTopRight>(shape=rectTopRight, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+        // PolygonSprite(shape=rectGoalTop, color=#00ff00, layer=layer+3)
+        PolygonCollider<TableBorderTopRight>(shape=rectTopRight, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
         // PolygonSprite(shape=rectTopRight, color=#00ff00, layer=layer)
 
-        PolygonCollider<TableBorderBottomLeft>(shape=rectBottomLeft, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+        PolygonCollider<TableBorderBottomLeft>(shape=rectBottomLeft, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
         // PolygonSprite(shape=rectBottomLeft, color=#00ff00, layer=layer)
         PolygonCollider<TableGoalBottom>(shape=rectGoalBottom, isSensor=true, category=Category:Table, collideWith=Category:Puck, sense=Category:Puck)
-        PolygonSprite(shape=rectGoalBottom, color=#00ff00, layer=layer+3)
-        PolygonCollider<TableBorderBottomRight>(shape=rectBottomRight, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+        // PolygonSprite(shape=rectGoalBottom, color=#00ff00, layer=layer+3)
+        PolygonCollider<TableBorderBottomRight>(shape=rectBottomRight, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
         // PolygonSprite(shape=rectBottomRight, color=#00ff00, layer=layer)
     
     } else {    
-        PolygonCollider<TableBorderTop>(shape=rectTop, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+        PolygonCollider<TableBorderTop>(shape=rectTop, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
         // PolygonSprite(shape=rectTop, color=#00ff00, layer=layer)
-        PolygonCollider<TableBorderBottom>(shape=rectBottom, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+        PolygonCollider<TableBorderBottom>(shape=rectBottom, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
         // PolygonSprite(shape=rectBottom, color=#00ff00, layer=layer)
     }
 
-    PolygonCollider<TableCornerBottomLeft>(shape=cornerBottomLeft, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    PolygonCollider<TableCornerBottomLeft>(shape=cornerBottomLeft, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
     // PolygonSprite(shape=cornerBottomLeft, color=#00ff00)
-    PolygonCollider<TableCornerBottomRight>(shape=cornerBottomRight, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+    PolygonCollider<TableCornerBottomRight>(shape=cornerBottomRight, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
     // PolygonSprite(shape=cornerBottomRight, color=#00ff00)
     
 
     if tableOrientation == TableOrientationLandscape {    
-        PolygonCollider<TableBorderLeftTop>(shape=rectLeftTop, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+        PolygonCollider<TableBorderLeftTop>(shape=rectLeftTop, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
         // PolygonSprite(shape=rectLeftTop, color=#00ff00, layer=layer)
         PolygonCollider<TableGoalLeft>(shape=rectGoalLeft, isSensor=true, category=Category:Table, collideWith=Category:Puck, sense=Category:Puck)
-        PolygonSprite(shape=rectGoalLeft, color=#00ff00, layer=layer+3)
-        PolygonCollider<TableBorderLeftBottom>(shape=rectLeftBottom, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+        // PolygonSprite(shape=rectGoalLeft, color=#00ff00, layer=layer+3)
+        PolygonCollider<TableBorderLeftBottom>(shape=rectLeftBottom, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
         // PolygonSprite(shape=rectLeftBottom, color=#00ff00, layer=layer)
     
-        PolygonCollider<TableBorderRightTop>(shape=rectRightTop, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+        PolygonCollider<TableBorderRightTop>(shape=rectRightTop, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
         // PolygonSprite(shape=rectRightTop, color=#00ff00, layer=layer)
         PolygonCollider<TableGoalRight>(shape=rectGoalRight, isSensor=true, category=Category:Table, collideWith=Category:Puck, sense=Category:Puck)
-        PolygonSprite(shape=rectGoalRight, color=#00ff00, layer=layer+3)
-        PolygonCollider<TableBorderRightBottom>(shape=rectRightBottom, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+        // PolygonSprite(shape=rectGoalRight, color=#00ff00, layer=layer+3)
+        PolygonCollider<TableBorderRightBottom>(shape=rectRightBottom, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
         // PolygonSprite(shape=rectRightBottom, color=#00ff00, layer=layer)
     } else {
-        PolygonCollider<TableBorderLeft>(shape=rectLeft, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+        PolygonCollider<TableBorderLeft>(shape=rectLeft, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
         // PolygonSprite(shape=rectLeft, color=#00ff00, layer=layer)
-        PolygonCollider<TableBorderRight>(shape=rectRight, category=Category:Table, density=5, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
+        PolygonCollider<TableBorderRight>(shape=rectRight, category=Category:Table, passthroughSiblings=true, restitution=TABLE_RESTITUTION)
         // PolygonSprite(shape=rectRight, color=#00ff00, layer=layer)
     }
 
     // table design
-    PolygonSprite(shape=Rectangle(width=tableSize.X-8, height=tableSize.Y-8, border=5), color=#0000ff, layer=layer)
-    PolygonSprite(shape=Rectangle(width=tableSize.X-10, height=tableSize.Y-10, border=5), color=#bebebe, layer=layer)
+    PolygonSprite(shape=Rectangle(width=tableSize.X-10+TABLE_BORDER_WIDTH, height=tableSize.Y-10+TABLE_BORDER_WIDTH, border=5), color=TABLE_COLOR_BORDER, layer=layer)
+    PolygonSprite(shape=Rectangle(width=tableSize.X-10, height=tableSize.Y-10, border=5), color=TABLE_COLOR_SURFACE, layer=layer)
+    if tableOrientation == TableOrientationLandscape {
+        const rectSpriteGoalLeft = Rectangle(pos=@(-tableSize.X*0.5, 0), width=goalSize.X, height=goalSize.Y)
+        const rectSpriteGoalRight = Rectangle(pos=@(tableSize.X*0.5, 0), width=goalSize.X, height=goalSize.Y)
+        PolygonSprite(shape=rectSpriteGoalLeft, color=TABLE_COLOR_GOAL, layer=layer+3)
+        PolygonSprite(shape=rectSpriteGoalRight, color=TABLE_COLOR_GOAL, layer=layer+3)
+    } else {
+        const rectSpriteGoalTop = Rectangle(pos=@(0, -tableSize.Y*0.5), width=goalSize.X, height=goalSize.Y)
+        const rectSpriteGoalBottom = Rectangle(pos=@(0, tableSize.Y*0.5), width=goalSize.X, height=goalSize.Y)
+        PolygonSprite(shape=rectSpriteGoalTop, color=TABLE_COLOR_GOAL, layer=layer+3)
+        PolygonSprite(shape=rectSpriteGoalBottom, color=TABLE_COLOR_GOAL, layer=layer+3)        
+    }
     // table lines
     let line1 = Line([@(-tableSize.X*0.25,-tableSize.Y*0.5+0.25), @(-tableSize.X*0.25,tableSize.Y*0.5-0.25)], radius=0.2)
     let line2 = Line([@(0,-tableSize.Y*0.5+0.25), @(0,tableSize.Y*0.5-0.25)], radius=0.2)
@@ -166,12 +182,12 @@ pub fn table.Table(tableSize=TABLE_SIZE) {
         line2 = Line([@(-tableSize.X*0.5+0.25, 0), @(tableSize.X*0.5-0.25, 0)], radius=0.2)
         line3 = Line([@(-tableSize.X*0.5+0.25, tableSize.Y*0.25), @(tableSize.X*0.5-0.25, tableSize.Y*0.25)], radius=0.2)
     }
-    PolygonSprite(shape=line1, color=#888888, layer=layer)
-    PolygonSprite(shape=line2, color=#888888, layer=layer)
-    PolygonSprite(shape=line3, color=#888888, layer=layer)
-    PolygonSprite(shape=Circle(radius=7), color=#888888, layer=layer)
-    PolygonSprite(shape=Circle(radius=6.6), color=#bebebe, layer=layer)
-    PolygonSprite(shape=Circle(radius=0.5), color=#888888, layer=layer)
+    PolygonSprite(shape=line1, color=TABLE_COLOR_LINE, layer=layer)
+    PolygonSprite(shape=line2, color=TABLE_COLOR_LINE, layer=layer)
+    PolygonSprite(shape=line3, color=TABLE_COLOR_LINE, layer=layer)
+    PolygonSprite(shape=Circle(radius=7), color=TABLE_COLOR_LINE, layer=layer)
+    PolygonSprite(shape=Circle(radius=6.6), color=TABLE_COLOR_SURFACE, layer=layer)
+    PolygonSprite(shape=Circle(radius=0.5), color=TABLE_COLOR_LINE, layer=layer)
 
     on BeforeCollide that {
         if that.Category.Overlaps(Category:Mallet) && PointerOutside(that.Owner, tableSize) {

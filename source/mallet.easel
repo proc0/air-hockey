@@ -1,21 +1,32 @@
 pub tangible category Category:Mallet
 
-const MALLET_RESTITUTION = 0.9
 const MALLET_RADIUS = 5
+const MALLET_RESTITUTION = 0.9
 
 pub signal World.MalletGrab
 pub signal World.MalletRelease
 
-pub fn mallet.Mallet([owner]) {
+pub fn mallet.Mallet([owner], radius=MALLET_RADIUS) {
     use body = mallet
+    use radius=radius
+    use color=#000000
     use layer = 4
     
     Body(pos=Pointer, gravityScale=0)
-    PolygonCollider(shape=Circle(radius=MALLET_RADIUS), category=Category:Mallet, restitution=MALLET_RESTITUTION, intercept=Category:Puck, tolerance=0.1)
-    PolygonSprite(shape=Circle(radius=MALLET_RADIUS), color=#bb0000, layer=layer)
-    PolygonSprite(shape=Circle(radius=MALLET_RADIUS*0.8), color=#ff0000, layer=layer)
-    PolygonSprite(shape=Circle(radius=MALLET_RADIUS*0.4), color=#bb0000, layer=layer)
+    PolygonCollider(shape=Circle, category=Category:Mallet, restitution=MALLET_RESTITUTION, intercept=Category:Puck, tolerance=0.1)
+    
+    PolygonSprite(shape=Circle(radius=radius*1.03))
+    PolygonSprite(shape=Circle, ownerColor=1)
+    PolygonSprite(shape=Circle(radius=radius*0.83))
+    PolygonSprite(shape=Circle(radius=radius*0.8), ownerColor=0.8)
+    PolygonSprite(shape=Circle(radius=radius*0.43))
+    PolygonSprite(shape=Circle(radius=radius*0.4), ownerColor=1)
+    PolygonSprite(shape=Circle(pos=@(-1,-1), radius=radius*0.1), color=#ffffff)
 
+    on Paint {
+        Streak(dissipate=0.2s, bloom=0.6, diminish=0.9, taper=0.8, fade=0.8, opacity=0.5, radius=3, ownerColor=0.5, bloomAlpha=0.2, glare=0.3, color=#bbbbbb, layer=layer-1)
+    }
+    
     let grabbing = false
     
     with Pointer {
