@@ -1,14 +1,12 @@
 pub game fn World.Main() {
+    SolidBackground(color=#bbbbbb)
+    Camera(@(0,0), radius=@(50,50))
+    Viewport(aspectRatio=1.6)
+    
     Spawn table {
         Table
 
-        on GoalLeft {
-            Spawn puck {
-                Puck
-            }
-        }
-
-        on GoalRight {
+        on GoalTop, GoalBottom, GoalLeft, GoalRight {
             Spawn puck {
                 Puck
             }

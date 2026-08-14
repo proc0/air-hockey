@@ -18,7 +18,7 @@ pub fn puck.Puck(pos=@(0,0)) {
     // PolygonSprite(shape=Rhombus(width=PUCK_RADIUS*0.65, height=PUCK_RADIUS*0.3), color=#000000, layer=layer+1)
     PolygonSprite(shape=Circle(radius=PUCK_RADIUS*0.2), color=#000000, layer=layer+1)
     
-    DecaySpeed(0.015)
+    DecaySpeed(0.018)
     DecayTurnRate(0.08)
     LimitSpeed(300)
     
