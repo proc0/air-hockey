@@ -3,16 +3,16 @@ pub game fn World.Main() {
     Camera(@(0,0), radius=@(50,50))
     Viewport(aspectRatio=1.6)
     
-    Spawn table {
+    let t = Spawn table {
         Table
     }
 
-    let puck = Spawn puck {
+    let p = Spawn puck {
         Puck 
     }
     
     on GoalTop, GoalBottom, GoalLeft, GoalRight {
-        puck = Spawn puck {
+        p = Spawn puck {
             Puck
         }
     }
@@ -22,7 +22,7 @@ pub game fn World.Main() {
     
     SpawnBot
     SpawnEachPlayer player {
-        let mallet = Subspawn mallet {
+        let m = Subspawn mallet {
             Mallet(pos=player.IsHuman ? startPos1 : startPos2)
         }
 
@@ -33,19 +33,47 @@ pub game fn World.Main() {
         }
 
         if !player.IsHuman {
-            on Tick(1) {
-                if Abs(mallet.Pos.Y) > Abs(puck.Pos.Y)+3 || Abs(mallet.Pos.Y) < Abs(puck.Pos.Y)-3 {
-                    mallet.Velocity = mallet.Velocity.Towards(@(0, (puck.Pos.Y - mallet.Pos.Y)*100), 50)
-                } else {
-                    mallet.Velocity = @(0,0)
+            on Tick(3) {
+                const ownGoalPos = @(-70, 0)
+                const puckLine = ownGoalPos - p.Pos
+                const malletLine = m.Pos - p.Pos
+                const malletPuckDot = Dot(puckLine.Direction, malletLine.Direction)
+                const malletLineProject = (Dot(puckLine, malletLine)/Length(puckLine).Pow(2))*puckLine
+                const malletDestination = p.Pos+malletLineProject-m.Pos
+
+                // on Paint {
+                //     PolygonSprite(body=p, shape=Line([@(0,0), malletLine], radius=0.3), color=#ff0000, layer=10)
+                //     PolygonSprite(body=p, shape=Line([@(0,0), puckLine], radius=0.2), color=#000000, layer=11)
+                //     PolygonSprite(body=m, shape=Line([@(0,0), malletDestination], radius=0.3), color=#00ff00, layer=12)
+                // }
+                
+                // if(m.Pos.X > p.Pos.X) {
+                //     m.Velocity = m.Velocity.Towards(@(p.Pos.X-5,0)-m.Pos, 10)
+                // } else 
+                
+                if (m.Pos.X < -55 || m.Pos.Y > 30 || m.Pos.Y < -30) {
+                    m.Velocity = m.Velocity.Towards(@(-35, 0)-m.Pos, 50)
+                    
                 }
+                else if (malletPuckDot < 0.99) {
+                    m.Velocity = m.Velocity.Towards(malletDestination*3, 50)
+                    // m.Velocity = m.Velocity.Towards(@(0, malletDestination.Y*2), 50)
+                } 
+                else {
+                    m.Velocity = @(0,0)
+                }
+                
+                // if Abs(m.Pos.Y) > Abs(p.Pos.Y)+3 || Abs(m.Pos.Y) < Abs(p.Pos.Y)-3 {
+                //     m.Velocity = m.Velocity.Towards(@(0, (p.Pos.Y - m.Pos.Y)*100), 50)
+                // } else {
+                //     m.Velocity = @(0,0)
+                // }
             }
     
-            on BeforeCollide that {
-                mallet.Velocity = @(0,0)
-                // if that.Category.Overlaps(Category:Puck) {
-                //     mallet.Velocity = @(0,0)
-                // }
+            on m.BeforeCollide that {
+                if that.Category.Overlaps(Category:Puck) {
+                    m.ApplyImpulse(@(10000, 0))
+                }
             }
         }
     }
