@@ -5,6 +5,8 @@ pub game fn World.Main() {
     
     let t = Spawn table {
         Table
+
+
     }
 
     let p = Spawn puck {
@@ -16,25 +18,31 @@ pub game fn World.Main() {
             Puck
         }
     }
-
-    const startPos1 = @(20,0)
-    const startPos2 = @(-20,0)
     
     SpawnBot
     SpawnEachPlayer player {
-        let m = Subspawn mallet {
-            Mallet(pos=player.IsHuman ? startPos1 : startPos2)
+        const playerSide = player.IsHuman ? t.Side<TableSideNear> : t.Side<TableSideFar>
+        const playerStartPos = player.IsHuman ? t.StartPos<TableSideNear> : t.StartPos<TableSideFar>
+        
+        const m = Subspawn mallet {
+            Mallet(side=playerSide, pos=playerStartPos)
         }
 
         if player.IsHuman {           
             Subspawn hand {
                 Hand
             }
+
+            on MalletGrabAttempt {
+                if !t.PointerOutside(m.Owner) && !t.WrongSide(m.Owner, mallet=m) {
+                    GrabMallet
+                }
+            }
         }
 
         if !player.IsHuman {
             on Tick(3) {
-                const ownGoalPos = @(-70, 0)
+                const ownGoalPos = @(playerSide.X, 0)
                 const puckLine = ownGoalPos - p.Pos
                 const malletLine = m.Pos - p.Pos
                 const malletPuckDot = Dot(puckLine.Direction, malletLine.Direction)
@@ -47,35 +55,26 @@ pub game fn World.Main() {
                 //     PolygonSprite(body=m, shape=Line([@(0,0), malletDestination], radius=0.3), color=#00ff00, layer=12)
                 // }
                 
-                // if(m.Pos.X > p.Pos.X) {
-                //     m.Velocity = m.Velocity.Towards(@(p.Pos.X-5,0)-m.Pos, 10)
-                // } else 
-                
-                if (m.Pos.X < -55 || m.Pos.Y > 30 || m.Pos.Y < -30) {
-                    m.Velocity = m.Velocity.Towards(@(-35, 0)-m.Pos, 50)
+                if (Length(m.Pos) > Length(playerStartPos)*1.3) {
+                    m.Velocity = m.Velocity.Towards((playerStartPos-m.Pos)*3, 50)
                     
                 }
                 else if (malletPuckDot < 0.99) {
                     m.Velocity = m.Velocity.Towards(malletDestination*3, 50)
-                    // m.Velocity = m.Velocity.Towards(@(0, malletDestination.Y*2), 50)
                 } 
                 else {
                     m.Velocity = @(0,0)
                 }
-                
-                // if Abs(m.Pos.Y) > Abs(p.Pos.Y)+3 || Abs(m.Pos.Y) < Abs(p.Pos.Y)-3 {
-                //     m.Velocity = m.Velocity.Towards(@(0, (p.Pos.Y - m.Pos.Y)*100), 50)
-                // } else {
-                //     m.Velocity = @(0,0)
-                // }
             }
     
             on m.BeforeCollide that {
                 if that.Category.Overlaps(Category:Puck) {
-                    m.ApplyImpulse(@(10000, 0))
+                    const impulseDirection = playerSide.X > 0 ? -1 : 1
+                    m.ApplyImpulse(@(impulseDirection*10000, 0))
                 }
             }
         }
+
     }
 
 

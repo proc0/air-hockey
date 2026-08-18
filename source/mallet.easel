@@ -3,15 +3,20 @@ pub tangible category Category:Mallet
 const MALLET_RADIUS = 5
 const MALLET_RESTITUTION = 0.9
 
+pub prop mallet.HomeSide
+
+pub signal World.MalletGrabAttempt
 pub signal World.MalletGrab
 pub signal World.MalletRelease
 
-pub fn mallet.Mallet([owner], radius=MALLET_RADIUS, pos=Pointer) {
+pub fn mallet.Mallet([owner], radius=MALLET_RADIUS, side, pos=Pointer) {
     use body = mallet
     use radius=radius
     use pos=pos
     use color=#000000
     use layer = 4
+
+    HomeSide=side
     
     Body(gravityScale=0)
     PolygonCollider(shape=Circle, category=Category:Mallet, restitution=MALLET_RESTITUTION, intercept=Category:Puck, tolerance=0.1)
@@ -38,22 +43,27 @@ pub fn mallet.Mallet([owner], radius=MALLET_RADIUS, pos=Pointer) {
         }
     }
 
-
-    on ButtonDown(Click) {
-        grabbing = true
-        MalletGrab
-    }
-
-    on ButtonDown(SecondaryClick) {
-        grabbing = false
-        MalletRelease
-    }
-
-
-    on PointerOut {
-        grabbing = false
-        MalletRelease
-        Velocity *= 0.3
+    if owner.IsHuman {
+        
+        on ButtonDown(Click) {
+            MalletGrabAttempt
+        }
+    
+        on ButtonDown(SecondaryClick) {
+            grabbing = false
+            MalletRelease
+        }
+    
+        on GrabMallet {
+            grabbing = true
+            MalletGrab
+        }
+        
+        on ReleaseMallet {
+            grabbing = false
+            MalletRelease
+            Velocity *= 0.3
+        }
     }
 }
 
