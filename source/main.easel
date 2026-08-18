@@ -23,6 +23,10 @@ pub game fn World.Main() {
     SpawnEachPlayer player {
         const playerSide = player.IsHuman ? t.Side<TableSideNear> : t.Side<TableSideFar>
         const playerStartPos = player.IsHuman ? t.StartPos<TableSideNear> : t.StartPos<TableSideFar>
+        let ownGoalPos = @(playerSide.X, 0)
+        if (t.Orientation == TableOrientationPortrait) {
+            ownGoalPos = @(0, playerSide.Y)
+        }
         
         const m = Subspawn mallet {
             Mallet(side=playerSide, pos=playerStartPos)
@@ -42,7 +46,7 @@ pub game fn World.Main() {
 
         if !player.IsHuman {
             on Tick(3) {
-                const ownGoalPos = @(playerSide.X, 0)
+
                 const puckLine = ownGoalPos - p.Pos
                 const malletLine = m.Pos - p.Pos
                 const malletPuckDot = Dot(puckLine.Direction, malletLine.Direction)
@@ -69,8 +73,13 @@ pub game fn World.Main() {
     
             on m.BeforeCollide that {
                 if that.Category.Overlaps(Category:Puck) {
-                    const impulseDirection = playerSide.X > 0 ? -1 : 1
-                    m.ApplyImpulse(@(impulseDirection*10000, 0))
+                    if (t.Orientation == TableOrientationLandscape) {
+                        const impulseDirection = playerSide.X > 0 ? -1 : 1
+                        m.ApplyImpulse(@(impulseDirection*10000, 0))
+                    } else {
+                        const impulseDirection = playerSide.Y > 0 ? -1 : 1
+                        m.ApplyImpulse(@(0, impulseDirection*10000))
+                    }
                 }
             }
         }

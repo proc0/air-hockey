@@ -1,6 +1,6 @@
 pub tangible category Category:Table
 
-const TABLE_SIZE = @(140, 70)
+const TABLE_SIZE = @(50, 90)
 const TABLE_ORIGIN = @(0, 0)
 const TABLE_GOAL_WIDTH = 0.3
 const TABLE_GOAL_DEPTH = 5
@@ -14,14 +14,15 @@ const TABLE_COLOR_GOAL = #87ee89
 const TABLE_COLOR_BORDER = #3434ff
 const TABLE_COLOR_LINE = #888888
 
-symbol TableOrientationLandscape
-symbol TableOrientationPortrait
+pub symbol TableOrientationLandscape
+pub symbol TableOrientationPortrait
 pub symbol TableSideFar
 pub symbol TableSideNear
 
 pub prop table.Side<SideId>
 pub prop table.StartPos<SideId>
 pub prop table.Size
+pub prop table.Orientation
 
 pub signal World.ReleaseMallet
 pub signal World.GrabMallet
@@ -74,6 +75,8 @@ pub fn table.Table(tableSize=TABLE_SIZE) {
 
     let tableOrientation = tableSize.X > tableSize.Y ? TableOrientationLandscape : TableOrientationPortrait
 
+    Orientation = tableOrientation
+    
     let goalSize = @(TABLE_GOAL_DEPTH, tableSize.Y*TABLE_GOAL_WIDTH)
     let goalSideLength = 0.5*tableSize.Y*(1 - TABLE_GOAL_WIDTH)
     let goalSensorOffset = TABLE_BORDER_WIDTH*2
@@ -247,6 +250,10 @@ pub fn table.PointerOutside([owner]) -> Boolean {
 }
 
 pub fn table.WrongSide([owner], mallet) -> Boolean {
-    return (mallet.HomeSide.X < 0 && Pointer.X > 0) || (mallet.HomeSide.X > 0 && Pointer.X < 0)
+    if Orientation == TableOrientationLandscape {
+        return (mallet.HomeSide.X < 0 && Pointer.X > 0) || (mallet.HomeSide.X > 0 && Pointer.X < 0)
+    } else {
+        return (mallet.HomeSide.Y < 0 && Pointer.Y > 0) || (mallet.HomeSide.Y > 0 && Pointer.Y < 0)
+    }
 }
 
