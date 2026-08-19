@@ -1,0 +1,153 @@
+const BOT_ACCELERATION = 10
+const BOT_URGENCY = 60
+const BOT_SHOOT_POWER = 100
+
+const GOAL_THREAT_RADIUS = 35
+const MAX_ATTACK_PUCK_SPEED = 15
+const BOT_INTERCEPT_RADIUS = 20
+const BOT_DEFEND_MIN = 0.15
+const BOT_DEFEND_MAX = 0.85
+
+pub symbol BotStateIDLE
+pub symbol BotStateDEFEND
+pub symbol BotStateATTACK
+pub symbol BotStateINTERCEPT
+
+pub fn IsPuckHomeSide(tableOrientation, homeSide, puckPos) -> Boolean {
+    if (tableOrientation == TableOrientationLandscape) {
+        return (homeSide.X > 0 && puckPos.X > 0) || (homeSide.X < 0 && puckPos.X < 0)
+    }
+
+    if (tableOrientation == TableOrientationPortrait) {
+        return (homeSide.Y > 0 && puckPos.Y > 0) || (homeSide.Y < 0 && puckPos.Y < 0)
+    }
+}
+
+pub fn IsPuckThreateningGoal(ownGoalPos, puck) -> Boolean {
+    const goalSight = ownGoalPos - puck.Pos
+    const goalAlignment = Dot(goalSight.Direction, puck.Velocity.Direction)
+    
+    return goalAlignment > 0.3 && Distance(puck.Pos, ownGoalPos) < GOAL_THREAT_RADIUS
+}
+
+pub fn IsPuckVeryCloseToGoal(ownGoalPos, puck) -> Boolean {
+    const dist = Distance(puck.Pos, ownGoalPos)
+    const normalDist = ownGoalPos - puck.Pos
+    const movingInward = Dot(puck.Velocity.Direction, normalDist.Direction) > 0
+
+    return dist < BOT_INTERCEPT_RADIUS && movingInward
+}
+
+pub fn CanAttack(tableOrientation, ownGoalPos, mallet, puck) -> Boolean {
+    if !IsPuckHomeSide(tableOrientation, homeSide=mallet.HomeSide, puckPos=puck.Pos) { return false }
+
+    if tableOrientation == TableOrientationLandscape {    
+        if (mallet.HomeSide.X > 0 && puck.Pos.X > mallet.Pos.X) || (mallet.HomeSide.X < 0 && puck.Pos.X < mallet.Pos.X) {
+            return false
+        }
+    }
+    if tableOrientation == TableOrientationPortrait {    
+        if (mallet.HomeSide.Y > 0 && puck.Pos.Y > mallet.Pos.Y) || (mallet.HomeSide.Y < 0 && puck.Pos.Y < mallet.Pos.Y) {
+            return false
+        }
+    }
+
+    if Distance(ownGoalPos, puck.Pos) < GOAL_THREAT_RADIUS { return false }
+
+    if Length(puck.Velocity) > MAX_ATTACK_PUCK_SPEED { return false }
+
+    return true
+    
+}
+
+pub fn UpdateIdle(tableOrientation, ownGoalPos, mallet, puck) {
+
+    // mallet.Velocity = mallet.Velocity.Towards((puck.Pos-mallet.Pos)*BOT_ACCELERATION, BOT_URGENCY)
+    mallet.Velocity = mallet.Velocity.Towards((ownGoalPos*0.8-mallet.Pos)*BOT_ACCELERATION, BOT_URGENCY)
+    
+    if IsPuckThreateningGoal(ownGoalPos=ownGoalPos, puck=puck) {
+        mallet.BotState = BotStateDEFEND
+    } else if CanAttack(tableOrientation=tableOrientation, ownGoalPos=ownGoalPos, mallet=mallet, puck=puck) {
+        mallet.BotState = BotStateATTACK
+    } else {
+        mallet.BotState = BotStateIDLE
+    }
+}
+
+pub fn UpdateDefend(tableOrientation, ownGoalPos, mallet, puck) {
+    const puckToGoal = ownGoalPos - puck.Pos
+    const puckToMallet = mallet.Pos - puck.Pos
+    const puckMalletAlignment = Dot(puckToGoal.Direction, puckToMallet.Direction)
+    const malletTargetProjectScalar = Dot(puckToGoal, puckToMallet)/Length(puckToGoal).Pow(2)
+    const malletTargetProjectPoint = puck.Pos + malletTargetProjectScalar.Clamp(BOT_DEFEND_MIN, BOT_DEFEND_MAX)*puckToGoal
+    let malletTargetPos = malletTargetProjectPoint - mallet.Pos
+
+    if puckMalletAlignment > 0.97 {
+        malletTargetPos = mallet.Pos
+    }
+
+    mallet.Velocity = mallet.Velocity.Towards(malletTargetPos*BOT_ACCELERATION, BOT_URGENCY)
+
+    if CanAttack(tableOrientation=tableOrientation, ownGoalPos=ownGoalPos, mallet=mallet, puck=puck) {
+        mallet.BotState = BotStateATTACK
+    } else if IsPuckVeryCloseToGoal(ownGoalPos, puck=puck) {
+        mallet.BotState = BotStateINTERCEPT
+    } else if !IsPuckThreateningGoal(ownGoalPos, puck=puck) {
+        mallet.BotState = BotStateIDLE
+    } else {
+        mallet.BotState = BotStateDEFEND
+    }
+}
+
+pub fn UpdateAttack(tableOrientation, ownGoalPos, playerGoalPos, mallet, puck) {
+
+
+
+    if ((mallet.HomeSide.X > 0 && puck.Pos.X < mallet.Pos.X) || (mallet.HomeSide.X < 0 && puck.Pos.X > mallet.Pos.X)) {
+        const goalLine = playerGoalPos - puck.Pos
+        const malletGoalLine = playerGoalPos - mallet.Pos
+        const malletGoalDot = Dot(goalLine.Direction, malletGoalLine.Direction)
+        const goalLineProject = (Dot(goalLine, malletGoalLine)/Length(goalLine).Pow(2))*malletGoalLine
+        const aimDestination = puck.Pos*2+goalLineProject-mallet.Pos
+        
+        if (Length(puck.Pos-mallet.Pos) < 15 || puck.Pos.X <= mallet.Pos.X) {
+            if (Abs(malletGoalDot) < 0.99) {
+                
+                ConsoleLog("SHOOOOT")
+                mallet.ApplyImpulse((playerGoalPos + mallet.Pos)*BOT_SHOOT_POWER)
+            } else {
+                ConsoleLog("MOVE TOWARDS PUCK")
+                mallet.Velocity = mallet.Velocity.Towards(aimDestination*BOT_ACCELERATION, BOT_URGENCY)
+            }
+        } else {
+            mallet.Velocity = mallet.Velocity.Towards(@(0, puck.Pos.X-mallet.Pos.X-15)*BOT_ACCELERATION, BOT_URGENCY)
+        }
+    } else {
+        mallet.Velocity = mallet.Velocity.Towards((puck.Pos-mallet.Pos)*BOT_ACCELERATION, BOT_URGENCY)
+    }
+
+
+    
+    // const shotPos = playerGoalPos - puck.Pos
+    // const BOT_STRIKE_OFFSET = @(5,5)
+    // const idealPos = puck.Pos - shotPos
+
+    // if mallet.Pos.X > puck.Pos.X {
+    //     const strikeDir = puck.Pos - mallet.Pos
+
+    //     mallet.Velocity = strikeDir.Direction.Towards(shotPos.Direction*BOT_ACCELERATION, BOT_URGENCY)
+    // } else {
+    //     mallet.Velocity = mallet.Velocity.Towards(idealPos*BOT_ACCELERATION, BOT_URGENCY)
+        
+    // }
+    if IsPuckVeryCloseToGoal(ownGoalPos, puck=puck) {
+        mallet.BotState = BotStateINTERCEPT
+    } else if !IsPuckThreateningGoal(ownGoalPos, puck=puck) {
+        mallet.BotState = BotStateIDLE
+    } else if !CanAttack(tableOrientation=tableOrientation, ownGoalPos=ownGoalPos, mallet=mallet, puck=puck) {
+        mallet.BotState = BotStateDEFEND
+    } else {
+        mallet.BotState = BotStateATTACK
+    }
+}
+

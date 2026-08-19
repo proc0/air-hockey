@@ -4,6 +4,7 @@ const MALLET_RADIUS = 5
 const MALLET_RESTITUTION = 0.9
 
 pub prop mallet.HomeSide
+pub prop mallet.BotState
 
 pub signal World.MalletGrabAttempt
 pub signal World.MalletGrab
@@ -43,6 +44,10 @@ pub fn mallet.Mallet([owner], radius=MALLET_RADIUS, side, pos=Pointer) {
         }
     }
 
+    if !owner.IsHuman {
+        BotState = BotStateIDLE
+    }
+    
     if owner.IsHuman {
         
         on ButtonDown(Click) {

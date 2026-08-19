@@ -24,10 +24,10 @@ pub game fn World.Main() {
         const playerSide = player.IsHuman ? t.Side<TableSideNear> : t.Side<TableSideFar>
         const playerStartPos = player.IsHuman ? t.StartPos<TableSideNear> : t.StartPos<TableSideFar>
         let ownGoalPos = @(playerSide.X, 0)
-        let goalPos = @(-playerSide.X, 0)
+        let playerGoalPos = @(-playerSide.X, 0)
         if (t.Orientation == TableOrientationPortrait) {
             ownGoalPos = @(0, playerSide.Y)
-            goalPos = @(0, -playerSide.Y)
+            playerGoalPos = @(0, -playerSide.Y)
         }
         
         const m = Subspawn mallet {
@@ -44,6 +44,23 @@ pub game fn World.Main() {
                     GrabMallet
                 }
             }
+
+            // debug
+
+            let grabPuck = false
+            
+            with Pointer {
+                behavior on BeforePhysics {
+                    if grabPuck {
+                        p.Pos = Pointer
+                    }
+                }
+            }
+        
+            on ButtonDown(TertiaryClick) {
+                grabPuck = true
+            }
+            // ---
         }
 
         if !player.IsHuman {
@@ -53,94 +70,111 @@ pub game fn World.Main() {
             
             on Tick(3) {
 
-                const puckLine = ownGoalPos - p.Pos
-                const malletLine = m.Pos - p.Pos
-                const malletPuckDot = Dot(puckLine.Direction, malletLine.Direction)
-                const malletLineProject = (Dot(puckLine, malletLine)/Length(puckLine).Pow(2))*puckLine
-                const malletDestination = p.Pos+malletLineProject-m.Pos
-
-                // on Paint {
-                //     PolygonSprite(body=p, shape=Line([@(0,0), malletLine], radius=0.3), color=#ff0000, layer=10)
-                //     PolygonSprite(body=p, shape=Line([@(0,0), puckLine], radius=0.2), color=#000000, layer=11)
-                //     PolygonSprite(body=m, shape=Line([@(0,0), malletDestination], radius=0.3), color=#00ff00, layer=12)
+                // if IsPuckVeryCloseToGoal( ownGoalPos=ownGoalPos, puck=p) {
+                //     ConsoleLog("PUCK THREAT")
                 // }
-                if (t.Orientation == TableOrientationLandscape) {
-                    if ((m.HomeSide.X > 0 && p.Pos.X > 0) || (m.HomeSide.X < 0 && p.Pos.X < 0)) {
-                        if ((m.HomeSide.X > 0 && p.Pos.X < m.Pos.X) || (m.HomeSide.X < 0 && p.Pos.X > m.Pos.X)) {
-                            const goalLine = goalPos - p.Pos
-                            const malletGoalLine = goalPos - m.Pos
-                            const malletGoalDot = Dot(goalLine.Direction, malletGoalLine.Direction)
-                            const goalLineProject = (Dot(goalLine, malletGoalLine)/Length(goalLine).Pow(2))*malletGoalLine
-                            const aimDestination = p.Pos*2+goalLineProject-m.Pos
-                            
-                            if (Length(p.Pos-m.Pos) < 15 || p.Pos.X <= m.Pos.X) {
-                                if (Abs(malletGoalDot) < 0.99) {
-                                    
-                                    ConsoleLog("SHOOOOT")
-                                    m.ApplyImpulse((goalPos + m.Pos)*SHOOT_MULT)
-                                } else {
-                                    ConsoleLog("MOVE TOWARDS PUCK")
-                                    m.Velocity = m.Velocity.Towards(aimDestination*ACCEL_MULT, URGENCY)
-                                }
-                            } else {
-                                m.Velocity = m.Velocity.Towards(@(0, p.Pos.X-m.Pos.X-15)*ACCEL_MULT, URGENCY)
-                            }
-                        } else {
-                            m.Velocity = m.Velocity.Towards((p.Pos-m.Pos)*ACCEL_MULT, URGENCY)
-                        }
-                    }
-                    else if (malletPuckDot < 0.99) {
-                        m.Velocity = m.Velocity.Towards(malletDestination*ACCEL_MULT, URGENCY)
-                    }
-                    // puck is on other side, reset position
-                    else if ((m.HomeSide.X > 0 && m.Pos.X > playerStartPos.X*0.3) || (m.HomeSide.X < 0 && m.Pos.X < playerStartPos.X*0.3)) {
-                        ConsoleLog("RESET POS")
-                        m.Velocity = m.Velocity.Towards((playerStartPos*1.4-m.Pos)*ACCEL_MULT, URGENCY)
-                    }
-                    else {
-                        m.Velocity = @(0,0)
-                    }
-                } else {
-                    // puck is on home side
-                    if ((m.HomeSide.Y > 0 && p.Pos.Y > 0) || (m.HomeSide.Y < 0 && p.Pos.Y < 0)) {
-                        if ((m.HomeSide.Y > 0 && p.Pos.Y < m.Pos.Y) || (m.HomeSide.Y < 0 && p.Pos.Y > m.Pos.Y)) {
-                            const goalLine = goalPos - p.Pos
-                            const malletGoalLine = goalPos - m.Pos
-                            const malletGoalDot = Dot(goalLine.Direction, malletGoalLine.Direction)
-                            const goalLineProject = (Dot(goalLine, malletGoalLine)/Length(goalLine).Pow(2))*malletGoalLine
-                            const aimDestination = p.Pos*2+goalLineProject-m.Pos
-
-                            if (Length(p.Pos-m.Pos) < 15 || p.Pos.Y >= m.Pos.Y) {
-                                if (Abs(malletGoalDot) < 0.99) {
-                                    
-                                    ConsoleLog("SHOOOOT")
-                                    m.ApplyImpulse((goalPos + m.Pos)*SHOOT_MULT)
-                                } else {
-                                    ConsoleLog("MOVE TOWARDS PUCK")
-                                    m.Velocity = m.Velocity.Towards(aimDestination*ACCEL_MULT, URGENCY)
-                                }
-                            } else {
-                                m.Velocity = m.Velocity.Towards(@(0, p.Pos.Y-m.Pos.Y-15)*ACCEL_MULT, URGENCY)
-                            }
-                        } else {
-                            m.Velocity = m.Velocity.Towards((p.Pos-m.Pos)*ACCEL_MULT, URGENCY)
-                        }
-                    } 
-                    // block puck line of sight
-                    else if (malletPuckDot < 0.99) {
-                        ConsoleLog("BLOCK PUCK")
-                        m.Velocity = m.Velocity.Towards(malletDestination*ACCEL_MULT, URGENCY)
-                    } 
-                    // puck is on other side, reset position
-                    else if ((m.HomeSide.Y > 0 && m.Pos.Y > playerStartPos.Y*0.3) || (m.HomeSide.Y < 0 && m.Pos.Y < playerStartPos.Y*0.3)) {
-                        ConsoleLog("RESET POS")
-                        m.Velocity = m.Velocity.Towards((playerStartPos*1.8-m.Pos)*ACCEL_MULT, URGENCY)
-                    }
-                    else {
-                        ConsoleLog("STOP")
-                        m.Velocity = @(0,0)
-                    }
+                
+                if m.BotState == BotStateIDLE {
+                    UpdateIdle(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, mallet=m, puck=p)
+                } else if m.BotState == BotStateDEFEND {
+                    ConsoleLog("DEFEND")
+                    UpdateDefend(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, mallet=m, puck=p)
+                } else if m.BotState == BotStateATTACK {
+                    ConsoleLog("ATTACK")
+                    UpdateAttack(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, playerGoalPos=playerGoalPos, mallet=m, puck=p)
+                } else if m.BotState == BotStateINTERCEPT {
+                    ConsoleLog("INTERCEPT")
+                    UpdateDefend(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, mallet=m, puck=p)
                 }
+                
+                // const puckLine = ownGoalPos - p.Pos
+                // const malletLine = m.Pos - p.Pos
+                // const malletPuckDot = Dot(puckLine.Direction, malletLine.Direction)
+                // const malletLineProject = (Dot(puckLine, malletLine)/Length(puckLine).Pow(2))*puckLine
+                // const malletDestination = p.Pos+malletLineProject-m.Pos
+
+                // // on Paint {
+                // //     PolygonSprite(body=p, shape=Line([@(0,0), malletLine], radius=0.3), color=#ff0000, layer=10)
+                // //     PolygonSprite(body=p, shape=Line([@(0,0), puckLine], radius=0.2), color=#000000, layer=11)
+                // //     PolygonSprite(body=m, shape=Line([@(0,0), malletDestination], radius=0.3), color=#00ff00, layer=12)
+                // // }
+                // if (t.Orientation == TableOrientationLandscape) {
+                //     if ((m.HomeSide.X > 0 && p.Pos.X > 0) || (m.HomeSide.X < 0 && p.Pos.X < 0)) {
+                //         if ((m.HomeSide.X > 0 && p.Pos.X < m.Pos.X) || (m.HomeSide.X < 0 && p.Pos.X > m.Pos.X)) {
+                //             const goalLine = goalPos - p.Pos
+                //             const malletGoalLine = goalPos - m.Pos
+                //             const malletGoalDot = Dot(goalLine.Direction, malletGoalLine.Direction)
+                //             const goalLineProject = (Dot(goalLine, malletGoalLine)/Length(goalLine).Pow(2))*malletGoalLine
+                //             const aimDestination = p.Pos*2+goalLineProject-m.Pos
+                            
+                //             if (Length(p.Pos-m.Pos) < 15 || p.Pos.X <= m.Pos.X) {
+                //                 if (Abs(malletGoalDot) < 0.99) {
+                                    
+                //                     ConsoleLog("SHOOOOT")
+                //                     m.ApplyImpulse((goalPos + m.Pos)*SHOOT_MULT)
+                //                 } else {
+                //                     ConsoleLog("MOVE TOWARDS PUCK")
+                //                     m.Velocity = m.Velocity.Towards(aimDestination*ACCEL_MULT, URGENCY)
+                //                 }
+                //             } else {
+                //                 m.Velocity = m.Velocity.Towards(@(0, p.Pos.X-m.Pos.X-15)*ACCEL_MULT, URGENCY)
+                //             }
+                //         } else {
+                //             m.Velocity = m.Velocity.Towards((p.Pos-m.Pos)*ACCEL_MULT, URGENCY)
+                //         }
+                //     }
+                //     else if (malletPuckDot < 0.99) {
+                //         m.Velocity = m.Velocity.Towards(malletDestination*ACCEL_MULT, URGENCY)
+                //     }
+                //     // puck is on other side, reset position
+                //     else if ((m.HomeSide.X > 0 && m.Pos.X > playerStartPos.X*0.3) || (m.HomeSide.X < 0 && m.Pos.X < playerStartPos.X*0.3)) {
+                //         ConsoleLog("RESET POS")
+                //         m.Velocity = m.Velocity.Towards((playerStartPos*1.4-m.Pos)*ACCEL_MULT, URGENCY)
+                //     }
+                //     else {
+                //         m.Velocity = @(0,0)
+                //     }
+                // } else {
+                //     // puck is on home side
+                //     if ((m.HomeSide.Y > 0 && p.Pos.Y > 0) || (m.HomeSide.Y < 0 && p.Pos.Y < 0)) {
+                //         if ((m.HomeSide.Y > 0 && p.Pos.Y < m.Pos.Y) || (m.HomeSide.Y < 0 && p.Pos.Y > m.Pos.Y)) {
+                //             const goalLine = goalPos - p.Pos
+                //             const malletGoalLine = goalPos - m.Pos
+                //             const malletGoalDot = Dot(goalLine.Direction, malletGoalLine.Direction)
+                //             const goalLineProject = (Dot(goalLine, malletGoalLine)/Length(goalLine).Pow(2))*malletGoalLine
+                //             const aimDestination = p.Pos*2+goalLineProject-m.Pos
+
+                //             if (Length(p.Pos-m.Pos) < 15 || p.Pos.Y >= m.Pos.Y) {
+                //                 if (Abs(malletGoalDot) < 0.99) {
+                                    
+                //                     ConsoleLog("SHOOOOT")
+                //                     m.ApplyImpulse((goalPos + m.Pos)*SHOOT_MULT)
+                //                 } else {
+                //                     ConsoleLog("MOVE TOWARDS PUCK")
+                //                     m.Velocity = m.Velocity.Towards(aimDestination*ACCEL_MULT, URGENCY)
+                //                 }
+                //             } else {
+                //                 m.Velocity = m.Velocity.Towards(@(0, p.Pos.Y-m.Pos.Y-15)*ACCEL_MULT, URGENCY)
+                //             }
+                //         } else {
+                //             m.Velocity = m.Velocity.Towards((p.Pos-m.Pos)*ACCEL_MULT, URGENCY)
+                //         }
+                //     } 
+                //     // block puck line of sight
+                //     else if (malletPuckDot < 0.99) {
+                //         ConsoleLog("BLOCK PUCK")
+                //         m.Velocity = m.Velocity.Towards(malletDestination*ACCEL_MULT, URGENCY)
+                //     } 
+                //     // puck is on other side, reset position
+                //     else if ((m.HomeSide.Y > 0 && m.Pos.Y > playerStartPos.Y*0.3) || (m.HomeSide.Y < 0 && m.Pos.Y < playerStartPos.Y*0.3)) {
+                //         ConsoleLog("RESET POS")
+                //         m.Velocity = m.Velocity.Towards((playerStartPos*1.8-m.Pos)*ACCEL_MULT, URGENCY)
+                //     }
+                //     else {
+                //         ConsoleLog("STOP")
+                //         m.Velocity = @(0,0)
+                //     }
+                // }
             }
         }
 

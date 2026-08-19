@@ -29,6 +29,7 @@ pub fn puck.Puck(radius=PUCK_RADIUS, color=PUCK_COLOR, pos=@(0,0)) {
         Streak(dissipate=0.2s, bloom=0.6, diminish=0.9, taper=0.8, fade=0.8, opacity=0.5, radius=3, ownerColor=0, bloomAlpha=0.2, glare=0.3, color=#bbbbbb, layer=layer-1)
     }
 
+    
     // Curve ball
     // ----------
     let collideState = 0
