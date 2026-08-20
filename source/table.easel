@@ -257,3 +257,6 @@ pub fn table.WrongSide([owner], mallet) -> Boolean {
     }
 }
 
+pub fn table.Scratched([owner], malletPos) -> Boolean {
+    return malletPos.X < -Size.X*0.5 || malletPos.X > Size.X*0.5 > 0 || malletPos.Y < -Size.Y*0.5 || malletPos.Y > Size.Y*0.5 > 0 
+}
