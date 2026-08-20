@@ -1,6 +1,6 @@
 pub tangible category Category:Table
 
-const TABLE_SIZE = @(140, 70)
+const TABLE_SIZE = @(150, 70)
 const TABLE_ORIGIN = @(0, 0)
 const TABLE_GOAL_WIDTH = 0.3
 const TABLE_GOAL_DEPTH = 5
@@ -80,14 +80,14 @@ pub fn table.Table(tableSize=TABLE_SIZE) {
     let goalSize = @(TABLE_GOAL_DEPTH, tableSize.Y*TABLE_GOAL_WIDTH)
     let goalSideLength = 0.5*tableSize.Y*(1 - TABLE_GOAL_WIDTH)
     let goalSensorOffset = TABLE_BORDER_WIDTH*2
-    StartPos<TableSideNear> = @(-tableSize.X*0.3,0)
-    StartPos<TableSideFar> = @(tableSize.X*0.3,0)
+    StartPos<TableSideNear> = @(-tableSize.X*0.3, 0)
+    StartPos<TableSideFar> = @(tableSize.X*0.3, 0)
     
     if (tableOrientation == TableOrientationPortrait) {
         goalSize = @(tableSize.X*TABLE_GOAL_WIDTH, TABLE_GOAL_DEPTH)
         goalSideLength = 0.5*tableSize.X*(1 - TABLE_GOAL_WIDTH)
-        StartPos<TableSideNear> = @(0, tableSize.X*0.3)
-        StartPos<TableSideFar> = @(0, -tableSize.X*0.3)
+        StartPos<TableSideNear> = @(0, tableSize.X*0.6)
+        StartPos<TableSideFar> = @(0, -tableSize.X*0.6)
     }
     
     Side<TableSideNear> = @(-tableSize.X*0.5, tableSize.Y*0.5)

@@ -45,7 +45,7 @@ pub fn mallet.Mallet([owner], radius=MALLET_RADIUS, side, pos=Pointer) {
     }
 
     if !owner.IsHuman {
-        BotState = BotStateIDLE
+        BotState = BotStateGUARD
     }
     
     if owner.IsHuman {

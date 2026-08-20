@@ -74,18 +74,33 @@ pub game fn World.Main() {
                 //     ConsoleLog("PUCK THREAT")
                 // }
                 
-                if m.BotState == BotStateIDLE {
-                    UpdateIdle(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, mallet=m, puck=p)
-                } else if m.BotState == BotStateDEFEND {
-                    ConsoleLog("DEFEND")
-                    UpdateDefend(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, mallet=m, puck=p)
-                } else if m.BotState == BotStateATTACK {
-                    ConsoleLog("ATTACK")
-                    UpdateAttack(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, playerGoalPos=playerGoalPos, mallet=m, puck=p)
-                } else if m.BotState == BotStateINTERCEPT {
-                    ConsoleLog("INTERCEPT")
-                    UpdateDefend(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, mallet=m, puck=p)
+                if m.BotState == BotStateGUARD {
+                    ConsoleLog("GUARD")
+                    UpdateGuard(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, mallet=m, puck=p)
+                } else if m.BotState == BotStateBLOCK {
+                    ConsoleLog("BLOCK")
+                    UpdateBlock(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, mallet=m, puck=p)
+                } else if m.BotState == BotStateALIGN {
+                    ConsoleLog("ALIGN")
+                    UpdateAlign(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, playerGoalPos=playerGoalPos, mallet=m, puck=p)
+                } else if m.BotState == BotStateSHOOT {
+                    ConsoleLog("SHOOT")
+                    UpdateShoot(tableOrientation=t.Orientation, playerGoalPos=playerGoalPos, mallet=m, puck=p)
                 }
+
+                // if m.BotState == BotStateIDLE {
+                //     ConsoleLog("IDLE")
+                //     UpdateIdle(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, mallet=m, puck=p)
+                // } else if m.BotState == BotStateDEFEND {
+                //     ConsoleLog("DEFEND")
+                //     UpdateDefend(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, mallet=m, puck=p)
+                // } else if m.BotState == BotStateATTACK {
+                //     ConsoleLog("ATTACK")
+                //     UpdateAttack(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, playerGoalPos=playerGoalPos, mallet=m, puck=p)
+                // } else if m.BotState == BotStateINTERCEPT {
+                //     ConsoleLog("INTERCEPT")
+                //     UpdateIntercept(ownGoalPos=ownGoalPos, mallet=m, puck=p)
+                // }
                 
                 // const puckLine = ownGoalPos - p.Pos
                 // const malletLine = m.Pos - p.Pos
