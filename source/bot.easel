@@ -4,6 +4,7 @@ const BOT_SHOOT_POWER = 6000
 
 const BOT_BLOCK_SUCCESS_SPEED = 15
 const BOT_BLOCK_PUCK_DISTANCE = 1
+const BOT_SHOOT_DISTANCE = 5
 
 const GOAL_THREAT_RADIUS = 35
 const MAX_ATTACK_PUCK_SPEED = 15
@@ -98,10 +99,19 @@ pub fn UpdateBlock(tableOrientation, ownGoalPos, mallet, puck) {
 
 pub fn UpdateAlign(tableOrientation, ownGoalPos, playerGoalPos, mallet, puck) {
     const goalLine = playerGoalPos - puck.Pos
-    const malletGoalLine = playerGoalPos - mallet.Pos
+    const malletGoalLine = puck.Pos - mallet.Pos
     const malletGoalDot = Dot(goalLine.Direction, malletGoalLine.Direction)
-    
-    if malletGoalDot < 0.99 {
+
+    let aligned = false
+    if Length(puck.Pos) > Length(mallet.Pos) {
+        mallet.Velocity = mallet.Velocity.Towards((puck.Pos - mallet.Pos)*BOT_ACCELERATION, BOT_URGENCY)
+        
+    }
+    else if Length(puck.Pos - mallet.Pos) > BOT_SHOOT_DISTANCE {
+        mallet.Velocity = mallet.Velocity.Towards((puck.Pos - mallet.Pos)*BOT_ACCELERATION, 1)
+        
+    }
+    else if Abs(malletGoalDot) < 0.99 {
         const goalLineProject = (Dot(goalLine, malletGoalLine)/Length(goalLine).Pow(2))*malletGoalLine
         const malletTargetPos = puck.Pos + goalLineProject - mallet.Pos
         // const malletTarget = @(malletTargetPos.X.Clamp(-mallet.HomeSide.X, mallet.HomeSide.X), malletTargetPos.Y.Clamp(-mallet.HomeSide.Y, mallet.HomeSide.Y))
@@ -109,23 +119,24 @@ pub fn UpdateAlign(tableOrientation, ownGoalPos, playerGoalPos, mallet, puck) {
         mallet.Velocity = mallet.Velocity.Towards(malletTargetPos*BOT_ACCELERATION, BOT_URGENCY)
     }     
     else {
-        // mallet.Velocity = @(0,0)
-        mallet.BotState = BotStateSHOOT
+        aligned = true
+        mallet.Velocity = @(0,0)
     }
     
     if !IsPuckHomeSide(tableOrientation=tableOrientation, homeSide=mallet.HomeSide, puckPos=puck.Pos) {
         mallet.BotState = BotStateGUARD
     }
-    // else if Length(mallet.Velocity) < 1 {
-    //     mallet.BotState = BotStateSHOOT
-    // }
+    else if aligned {
+        mallet.BotState = BotStateSHOOT
+    }
     
 }
 
 pub fn UpdateShoot(tableOrientation, playerGoalPos, mallet, puck) {
     const aimLine = puck.Pos - mallet.Pos
-
-    if Dot(puck.Velocity.Direction, mallet.HomeSide.Direction) < 0 {
+    const sideExtent = tableOrientation == TableOrientationLandscape ? mallet.HomeSide.X : mallet.HomeSide.Y
+    
+    if Length(playerGoalPos-puck.Velocity) > sideExtent {
         mallet.ApplyImpulse(aimLine.Direction*BOT_SHOOT_POWER)
     }
     
