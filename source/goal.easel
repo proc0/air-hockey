@@ -1,0 +1,10 @@
+pub prop goal.Score
+pub fn goal.Goal([owner], goalRect, tableSide) {
+    use body = goal
+    use color=#000000
+    
+    Score = 0
+    Body(pos=@(0, 0))
+    PolygonSprite(shape=goalRect, ownerColor=1, layer=10)
+    
+}

@@ -3,104 +3,132 @@ pub game fn World.Main() {
     Camera(@(0,0), radius=@(50,50))
     Viewport(aspectRatio=1.6)
     
-    let t = Spawn table {
-        Table
-
-
-    }
-
     let p = Spawn puck {
         Puck 
+        // on GoalTop, GoalBottom, GoalLeft, GoalRight {
+        //     ConsoleLog("GOAL")
+        //     puck.Despawn
+        // }
     }
     
-    on GoalTop, GoalBottom, GoalLeft, GoalRight {
-        p = Spawn puck {
-            Puck
+    let t = Spawn table {
+        Table
+        // Not firing for some reason
+        on GoalTop, GoalBottom, GoalLeft, GoalRight {
+            ConsoleLog("GOAL")
+            p.Despawn
+            p = Spawn puck {
+                Puck
+            }
         }
     }
+
     
-    SpawnBot
+    
+    const bot = SpawnBot
+    
     SpawnEachPlayer player {
-        const playerSide = player.IsHuman ? t.Side<TableSideNear> : t.Side<TableSideFar>
-        const playerStartPos = player.IsHuman ? t.StartPos<TableSideNear> : t.StartPos<TableSideFar>
-        let ownGoalPos = @(playerSide.X, 0)
-        let playerGoalPos = @(-playerSide.X, 0)
-        if (t.Orientation == TableOrientationPortrait) {
-            ownGoalPos = @(0, playerSide.Y)
-            playerGoalPos = @(0, -playerSide.Y)
-        }
-        
-        let m = Subspawn mallet {
-            Mallet(side=playerSide, pos=playerStartPos)
-
-        }
-
-        on Tick(3) {
-            if (t.Scratched(owner=m.Owner, malletPos=m.Pos)) {
-                m.Despawn
-                m = Subspawn mallet {
-                    Mallet(side=playerSide, pos=playerStartPos)
-        
-                }
-            }
-        }
-        
-        if player.IsHuman {           
-            Subspawn hand {
-                Hand
-            }
-
-            on MalletGrabAttempt {
-                if !t.PointerOutside(m.Owner) && !t.WrongSide(m.Owner, mallet=m) {
-                    GrabMallet
-                }
-            }
-
-            // debug
-
-            let grabPuck = false
-            
-            with Pointer {
-                behavior on BeforePhysics {
-                    if grabPuck {
-                        p.Pos = Pointer
-                    }
-                }
-            }
-        
-            on ButtonDown(TertiaryClick) {
-                grabPuck = true
-            }
-            // ---
-        }
-
-        if !player.IsHuman {
-
-            
-            on Tick(3) {
-
-                // if IsPuckVeryCloseToGoal( ownGoalPos=ownGoalPos, puck=p) {
-                //     ConsoleLog("PUCK THREAT")
-                // }
-                
-                if m.BotState == BotStateGUARD {
-                    ConsoleLog("GUARD")
-                    UpdateGuard(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, mallet=m, puck=p)
-                } else if m.BotState == BotStateBLOCK {
-                    ConsoleLog("BLOCK")
-                    UpdateBlock(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, mallet=m, puck=p)
-                } else if m.BotState == BotStateALIGN {
-                    ConsoleLog("ALIGN")
-                    UpdateAlign(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, playerGoalPos=playerGoalPos, mallet=m, puck=p)
-                } else if m.BotState == BotStateSHOOT {
-                    ConsoleLog("SHOOT")
-                    UpdateShoot(tableOrientation=t.Orientation, playerGoalPos=playerGoalPos, mallet=m, puck=p)
-                }
-
-            }
-        }
+        SetupPlayer(t=t, p=p, player=player)
 
     }
 
+    const newPlayer = await PlayerJoined
+    if CountPlayers(isHuman=true) > 1 {
+        
+        bot.DespawnBot
+        SetupPlayer(t=t, p=p, player=newPlayer)
+    }
 
+
+}
+
+fn this.SetupPlayer(t, p, player) {
+    const playerSide = player.IsHuman ? t.Side<TableSideNear> : t.Side<TableSideFar>
+    const playerStartPos = player.IsHuman ? t.StartPos<TableSideNear> : t.StartPos<TableSideFar>
+    let ownGoalPos = @(playerSide.X, 0)
+    let playerGoalPos = @(-playerSide.X, 0)
+    if (t.Orientation == TableOrientationPortrait) {
+        ownGoalPos = @(0, playerSide.Y)
+        playerGoalPos = @(0, -playerSide.Y)
+    }
+    
+    let m = Subspawn mallet {
+        Mallet(owner=player, side=playerSide, pos=playerStartPos)
+
+    }
+
+    let g = Subspawn goal {
+        const tableSide = player.IsHuman ? TableSideNear : TableSideFar
+        Goal(owner=player, goalRect=t.GetGoalRect(owner=t, tableSide=tableSide), tableSide=tableSide)
+    }
+
+    on Tick(3) {
+        if (t.Scratched(owner=m.Owner, malletPos=m.Pos)) {
+            m.Despawn
+            m = Subspawn mallet {
+                Mallet(owner=player, side=playerSide, pos=playerStartPos)
+    
+            }
+        }
+    }
+ 
+    // on GoalTop, GoalBottom, GoalLeft, GoalRight {
+    //     g.Score += 1
+    //     ConsoleLog(g.Score)
+    // }
+    
+    if player.IsHuman {           
+        Subspawn hand {
+            Hand(owner=player)
+        }
+
+        on MalletGrabAttempt {
+            if !t.PointerOutside(m.Owner) && !t.WrongSide(m.Owner, mallet=m) {
+                GrabMallet
+            }
+        }
+
+        // debug
+
+        // let grabPuck = false
+        
+        // with Pointer {
+        //     behavior on BeforePhysics {
+        //         if grabPuck {
+        //             p.Pos = Pointer
+        //         }
+        //     }
+        // }
+    
+        // on ButtonDown(TertiaryClick) {
+        //     grabPuck = true
+        // }
+        // ---
+    }
+
+    if !player.IsHuman {
+
+        
+        on Tick(3) {
+
+            // if IsPuckVeryCloseToGoal( ownGoalPos=ownGoalPos, puck=p) {
+            //     ConsoleLog("PUCK THREAT")
+            // }
+            
+            if m.BotState == BotStateGUARD {
+                // ConsoleLog("GUARD")
+                UpdateGuard(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, mallet=m, puck=p)
+            } else if m.BotState == BotStateBLOCK {
+                // ConsoleLog("BLOCK")
+                UpdateBlock(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, mallet=m, puck=p)
+            } else if m.BotState == BotStateALIGN {
+                // ConsoleLog("ALIGN")
+                UpdateAlign(tableOrientation=t.Orientation, ownGoalPos=ownGoalPos, playerGoalPos=playerGoalPos, mallet=m, puck=p)
+            } else if m.BotState == BotStateSHOOT {
+                // ConsoleLog("SHOOT")
+                UpdateShoot(tableOrientation=t.Orientation, playerGoalPos=playerGoalPos, mallet=m, puck=p)
+            }
+
+        }
+    }
 }

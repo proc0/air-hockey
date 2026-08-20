@@ -31,6 +31,10 @@ pub signal World.GoalBottom
 pub signal World.GoalLeft
 pub signal World.GoalRight
 
+prop table.GoalTop
+prop table.GoalBottom
+prop table.GoalLeft
+prop table.GoalRight
 // table parts
 // -----------
 // top corners
@@ -104,6 +108,7 @@ pub fn table.Table(tableSize=TABLE_SIZE) {
     const rectTopLeft = Rectangle(pos=@(-(goalSize.X+goalSideLength)*0.5, -tableSize.Y*0.5-TABLE_BORDER_WIDTH*0.5), width=goalSideLength, height=TABLE_BORDER_WIDTH)
     const rectGoalTop = Rectangle(pos=@(0, -tableSize.Y*0.5-goalSensorOffset), width=goalSize.X, height=goalSize.Y)
     const rectTopRight = Rectangle(pos=@((goalSize.X+goalSideLength)*0.5, -tableSize.Y*0.5-TABLE_BORDER_WIDTH*0.5), width=goalSideLength, height=TABLE_BORDER_WIDTH)
+    
     // bottom
     const rectBottom = Rectangle(pos=@(0, tableSize.Y*0.5+TABLE_BORDER_WIDTH*0.5), width=tableSize.X, height=TABLE_BORDER_WIDTH)
     const rectBottomLeft = Rectangle(pos=@(-(goalSize.X+goalSideLength)*0.5, tableSize.Y*0.5+TABLE_BORDER_WIDTH*0.5), width=goalSideLength, height=TABLE_BORDER_WIDTH)
@@ -192,14 +197,18 @@ pub fn table.Table(tableSize=TABLE_SIZE) {
     PolygonSprite(shape=Rectangle(width=tableSize.X-10, height=tableSize.Y-10, border=5), color=TABLE_COLOR_SURFACE, layer=layer)
     if tableOrientation == TableOrientationLandscape {
         const rectSpriteGoalLeft = Rectangle(pos=@(-tableSize.X*0.5, 0), width=goalSize.X, height=goalSize.Y)
+        GoalLeft = rectSpriteGoalLeft
         const rectSpriteGoalRight = Rectangle(pos=@(tableSize.X*0.5, 0), width=goalSize.X, height=goalSize.Y)
-        PolygonSprite(shape=rectSpriteGoalLeft, color=TABLE_COLOR_GOAL, layer=layer+3)
-        PolygonSprite(shape=rectSpriteGoalRight, color=TABLE_COLOR_GOAL, layer=layer+3)
+        GoalRight = rectSpriteGoalRight
+        // PolygonSprite(shape=rectSpriteGoalLeft, color=TABLE_COLOR_GOAL, layer=layer+3)
+        // PolygonSprite(shape=rectSpriteGoalRight, color=TABLE_COLOR_GOAL, layer=layer+3)
     } else {
         const rectSpriteGoalTop = Rectangle(pos=@(0, -tableSize.Y*0.5), width=goalSize.X, height=goalSize.Y)
+        GoalTop = rectSpriteGoalTop
         const rectSpriteGoalBottom = Rectangle(pos=@(0, tableSize.Y*0.5), width=goalSize.X, height=goalSize.Y)
-        PolygonSprite(shape=rectSpriteGoalTop, color=TABLE_COLOR_GOAL, layer=layer+3)
-        PolygonSprite(shape=rectSpriteGoalBottom, color=TABLE_COLOR_GOAL, layer=layer+3)        
+        GoalBottom = rectSpriteGoalBottom
+        // PolygonSprite(shape=rectSpriteGoalTop, color=TABLE_COLOR_GOAL, layer=layer+3)
+        // PolygonSprite(shape=rectSpriteGoalBottom, color=TABLE_COLOR_GOAL, layer=layer+3)        
     }
     // table lines
     let line1 = Line([@(-tableSize.X*0.25,-tableSize.Y*0.5+0.25), @(-tableSize.X*0.25,tableSize.Y*0.5-0.25)], radius=0.2)
@@ -223,23 +232,19 @@ pub fn table.Table(tableSize=TABLE_SIZE) {
         }
     }
     
-    on AfterCollide<TableGoalTop> that {
-        that.Despawn
+    on BeforeCollide<TableGoalTop> {
         GoalTop
     }
 
-    on AfterCollide<TableGoalBottom> that {
-        that.Despawn
+    on BeforeCollide<TableGoalBottom> {
         GoalBottom
     }
     
-    on AfterCollide<TableGoalLeft> that {
-        that.Despawn
+    on BeforeCollide<TableGoalLeft> {
         GoalLeft
     }
 
-    on AfterCollide<TableGoalRight> that {
-        that.Despawn
+    on BeforeCollide<TableGoalRight> {
         GoalRight
     }
 
@@ -259,4 +264,20 @@ pub fn table.WrongSide([owner], mallet) -> Boolean {
 
 pub fn table.Scratched([owner], malletPos) -> Boolean {
     return malletPos.X < -Size.X*0.5 || malletPos.X > Size.X*0.5 > 0 || malletPos.Y < -Size.Y*0.5 || malletPos.Y > Size.Y*0.5 > 0 
+}
+
+pub fn table.GetGoalRect([owner], tableSide) -> Rectangle {
+    if (Orientation == TableOrientationLandscape) {
+        if (tableSide == TableSideNear) {
+            return GoalLeft
+        } else {
+            return GoalRight
+        }
+    } else {
+        if (tableSide == TableSideNear) {
+            return GoalBottom
+        } else {
+            return GoalTop
+        }
+    }
 }

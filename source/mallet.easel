@@ -18,7 +18,7 @@ pub fn mallet.Mallet([owner], radius=MALLET_RADIUS, side, pos=Pointer) {
     use layer = 4
 
     HomeSide=side
-    
+
     Body(gravityScale=0)
     PolygonCollider(shape=Circle, category=Category:Mallet, restitution=MALLET_RESTITUTION, intercept=Category:Puck, tolerance=0.1)
     
