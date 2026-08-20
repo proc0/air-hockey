@@ -1,8 +1,8 @@
 pub tangible category Category:Table
 
-const TABLE_SIZE = @(150, 70)
+const TABLE_SIZE = @(130, 70)
 const TABLE_ORIGIN = @(0, 0)
-const TABLE_GOAL_WIDTH = 0.3
+const TABLE_GOAL_WIDTH = 0.35
 const TABLE_GOAL_DEPTH = 5
 const TABLE_BORDER_WIDTH = 2
 const TABLE_CORNER_WIDTH = 1
@@ -11,7 +11,7 @@ const TABLE_RESTITUTION = 0.95
 
 const TABLE_COLOR_SURFACE = #dddddd
 const TABLE_COLOR_GOAL = #87ee89
-const TABLE_COLOR_BORDER = #3434ff
+const TABLE_COLOR_BORDER = #111111
 const TABLE_COLOR_LINE = #888888
 
 pub symbol TableOrientationLandscape
@@ -31,10 +31,10 @@ pub signal World.GoalBottom
 pub signal World.GoalLeft
 pub signal World.GoalRight
 
-prop table.GoalTop
-prop table.GoalBottom
-prop table.GoalLeft
-prop table.GoalRight
+prop table.GoalTopRect
+prop table.GoalBottomRect
+prop table.GoalLeftRect
+prop table.GoalRightRect
 // table parts
 // -----------
 // top corners
@@ -197,27 +197,27 @@ pub fn table.Table(tableSize=TABLE_SIZE) {
     PolygonSprite(shape=Rectangle(width=tableSize.X-10, height=tableSize.Y-10, border=5), color=TABLE_COLOR_SURFACE, layer=layer)
     if tableOrientation == TableOrientationLandscape {
         const rectSpriteGoalLeft = Rectangle(pos=@(-tableSize.X*0.5, 0), width=goalSize.X, height=goalSize.Y)
-        GoalLeft = rectSpriteGoalLeft
+        GoalLeftRect = rectSpriteGoalLeft
         const rectSpriteGoalRight = Rectangle(pos=@(tableSize.X*0.5, 0), width=goalSize.X, height=goalSize.Y)
-        GoalRight = rectSpriteGoalRight
+        GoalRightRect = rectSpriteGoalRight
         // PolygonSprite(shape=rectSpriteGoalLeft, color=TABLE_COLOR_GOAL, layer=layer+3)
         // PolygonSprite(shape=rectSpriteGoalRight, color=TABLE_COLOR_GOAL, layer=layer+3)
     } else {
         const rectSpriteGoalTop = Rectangle(pos=@(0, -tableSize.Y*0.5), width=goalSize.X, height=goalSize.Y)
-        GoalTop = rectSpriteGoalTop
+        GoalTopRect = rectSpriteGoalTop
         const rectSpriteGoalBottom = Rectangle(pos=@(0, tableSize.Y*0.5), width=goalSize.X, height=goalSize.Y)
-        GoalBottom = rectSpriteGoalBottom
+        GoalBottomRect = rectSpriteGoalBottom
         // PolygonSprite(shape=rectSpriteGoalTop, color=TABLE_COLOR_GOAL, layer=layer+3)
         // PolygonSprite(shape=rectSpriteGoalBottom, color=TABLE_COLOR_GOAL, layer=layer+3)        
     }
     // table lines
-    let line1 = Line([@(-tableSize.X*0.25,-tableSize.Y*0.5+0.25), @(-tableSize.X*0.25,tableSize.Y*0.5-0.25)], radius=0.2)
-    let line2 = Line([@(0,-tableSize.Y*0.5+0.25), @(0,tableSize.Y*0.5-0.25)], radius=0.2)
-    let line3 = Line([@(tableSize.X*0.25,-tableSize.Y*0.5+0.25), @(tableSize.X*0.25,tableSize.Y*0.5-0.25)], radius=0.2)
+    let line1 = Line([@(-tableSize.X*0.35,-tableSize.Y*0.5+0.35), @(-tableSize.X*0.35,tableSize.Y*0.5-0.35)], radius=0.2)
+    let line2 = Line([@(0,-tableSize.Y*0.5+0.35), @(0,tableSize.Y*0.5-0.35)], radius=0.2)
+    let line3 = Line([@(tableSize.X*0.35,-tableSize.Y*0.5+0.35), @(tableSize.X*0.35,tableSize.Y*0.5-0.35)], radius=0.2)
     if tableOrientation == TableOrientationPortrait {
-        line1 = Line([@(-tableSize.X*0.5+0.25, -tableSize.Y*0.25), @(tableSize.X*0.5-0.25, -tableSize.Y*0.25)], radius=0.2)
-        line2 = Line([@(-tableSize.X*0.5+0.25, 0), @(tableSize.X*0.5-0.25, 0)], radius=0.2)
-        line3 = Line([@(-tableSize.X*0.5+0.25, tableSize.Y*0.25), @(tableSize.X*0.5-0.25, tableSize.Y*0.25)], radius=0.2)
+        line1 = Line([@(-tableSize.X*0.5+0.35, -tableSize.Y*0.35), @(tableSize.X*0.5-0.35, -tableSize.Y*0.35)], radius=0.2)
+        line2 = Line([@(-tableSize.X*0.5+0.35, 0), @(tableSize.X*0.5-0.35, 0)], radius=0.2)
+        line3 = Line([@(-tableSize.X*0.5+0.35, tableSize.Y*0.35), @(tableSize.X*0.5-0.35, tableSize.Y*0.35)], radius=0.2)
     }
     PolygonSprite(shape=line1, color=TABLE_COLOR_LINE, layer=layer)
     PolygonSprite(shape=line2, color=TABLE_COLOR_LINE, layer=layer)
@@ -269,15 +269,15 @@ pub fn table.Scratched([owner], malletPos) -> Boolean {
 pub fn table.GetGoalRect([owner], tableSide) -> Rectangle {
     if (Orientation == TableOrientationLandscape) {
         if (tableSide == TableSideNear) {
-            return GoalLeft
+            return GoalLeftRect
         } else {
-            return GoalRight
+            return GoalRightRect
         }
     } else {
         if (tableSide == TableSideNear) {
-            return GoalBottom
+            return GoalBottomRect
         } else {
-            return GoalTop
+            return GoalTopRect
         }
     }
 }

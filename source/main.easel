@@ -1,14 +1,12 @@
+const WIN_SCORE = 7
+
 pub game fn World.Main() {
     SolidBackground(color=#222222)
     Camera(@(0,0), radius=@(50,50))
     Viewport(aspectRatio=1.6)
     
     let p = Spawn puck {
-        Puck 
-        // on GoalTop, GoalBottom, GoalLeft, GoalRight {
-        //     ConsoleLog("GOAL")
-        //     puck.Despawn
-        // }
+        Puck
     }
     
     let t = Spawn table {
@@ -60,6 +58,19 @@ fn this.SetupPlayer(t, p, player) {
     let g = Subspawn goal {
         const tableSide = player.IsHuman ? TableSideNear : TableSideFar
         Goal(owner=player, goalRect=t.GetGoalRect(owner=t, tableSide=tableSide), tableSide=tableSide)
+
+        with goal.Score {
+            if goal.Score >= WIN_SCORE {            
+                OverlayContent<levelTitle> {
+                    VStack(align=Align:Center) {
+                        Standout(fontSize=5) { %(player.PlayerName +" Wins") }
+                        H2 (marginBottom=3) {
+                            "Thank you for playing!"
+                        }
+                    }
+                }
+            }
+        }
     }
 
     on Tick(3) {

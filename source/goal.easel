@@ -1,10 +1,27 @@
 pub prop goal.Score
+
 pub fn goal.Goal([owner], goalRect, tableSide) {
     use body = goal
-    use color=#000000
+    use color=#ffffff
     
     Score = 0
     Body(pos=@(0, 0))
     PolygonSprite(shape=goalRect, ownerColor=1, layer=10)
+
+    let textOffset = @(0,0)
+    if tableSide == TableSideNear {
+        textOffset = @(-75, 0)
+        on GoalTop, GoalRight {
+            Score += 1
+        }
+    } else if tableSide == TableSideFar {
+        textOffset = @(75, 0)
+        on GoalBottom, GoalLeft {
+            Score += 1
+        }
+    }
     
+    with Score {
+        TextSprite(Score, bodyOffset=textOffset, fontSize=5, shadow=4, layer=11)
+    }
 }
